@@ -1,0 +1,29 @@
+---
+import { getMainNav, getSite } from '../lib/cms';
+
+const site = await getSite();
+const nav = getMainNav();
+const path = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/">
+      <strong>{site.name}</strong>
+      <span>Great Leighs · Chelmsford</span>
+    </a>
+    <input class="nav-toggle" type="checkbox" id="nav-toggle" />
+    <label class="nav-button" for="nav-toggle">Menu</label>
+    <nav class="nav" aria-label="Main">
+      {nav.map((item) => (
+        <a
+          href={item.href}
+          aria-current={path === item.href || (item.href !== '/' && path.startsWith(item.href)) ? 'page' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+      <a class="button button-primary" href="/bookings">Book the hall</a>
+    </nav>
+  </div>
+</header>

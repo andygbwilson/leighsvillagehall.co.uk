@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getGroups, getSite } from '../lib/cms';
+
+const site = await getSite();
+const groups = await getGroups();
+
+function contactHref(value: string) {
+  if (value.includes('@')) return `mailto:${value.split(' / ')[0]}`;
+  const digits = value.replace(/[^\d+]/g, '');
+  if (digits.length >= 10) return `tel:${value.split(' / ')[0].replace(/\s/g, '')}`;
+  return undefined;
+}
+---
+
+<BaseLayout
+  title="Clubs & contacts"
+  description="Regular users and organisation contacts for Leighs Village Hall in Great Leighs."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">Village life</p>
+    <h1>Clubs &amp; contacts</h1>
+    <p>
+      For private hire or organisation bookings, contact {site.bookingSecretary} on{' '}
+      <a href={site.phoneHref}>{site.phone}</a> or{' '}
+      <a href={`mailto:${site.email}`}>{site.email}</a>.
+    </p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap">
+      <p>
+        <a href="/documents/LVH-Organisation-Contacts.pdf">Download the organisation contact list (PDF)</a>
+      </p>
+      <div class="table-wrap" style="margin-top: 1.25rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Organisation</th>
+              <th>Times</th>
+              <th>Contact</th>
+              <th>Telephone / email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((group) => {
+              const href = contactHref(group.telephone);
+              return (
+                <tr>
+                  <td>{group.name}</td>
+                  <td>{group.times}</td>
+                  <td>{group.contact}</td>
+                  <td>
+                    {href ? <a href={href}>{group.telephone}</a> : group.telephone}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p class="meta" style="margin-top: 1rem;">
+        Amendments should be sent to {site.bookingSecretary} at
+        <a href={`mailto:${site.email}`}>{site.email}</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>

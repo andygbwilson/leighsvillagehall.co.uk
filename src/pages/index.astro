@@ -1,0 +1,104 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { formatDate, getNews, getRooms, getSite } from "../lib/cms";
+
+const site = await getSite();
+const rooms = await getRooms();
+const news = (await getNews()).slice(0, 2);
+
+function excerpt(text: string, maxLength = 140) {
+	const compact = text.trim();
+	if (compact.length <= maxLength) return compact;
+	return `${compact.slice(0, maxLength).replace(/\s+\S*$/, "")}…`;
+}
+---
+
+<BaseLayout>
+	<section class="hero">
+		<img src={site.heroImage} alt={site.heroAlt} />
+		<div class="wrap hero-copy">
+			<p class="kicker">Great Leighs · Essex</p>
+			<h1>{site.tagline}</h1>
+			<p>
+				Two halls, a modern kitchen and step-free access available to the village and to visitors for parties, clubs, meetings and
+				celebrations.
+			</p>
+			<div class="actions">
+				<a class="button button-primary" href={site.bookingUrl} rel="noreferrer">Check availability</a>
+				<a class="button button-secondary" href="/facilities">View the rooms</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section-paper">
+		<div class="wrap grid grid-2">
+			<div class="prose">
+				<h2>{site.name}</h2>
+				{site.intro.slice(0, 4).map((paragraph) => <p>{paragraph}</p>)}
+			</div>
+			<div class="grid">
+				<article class="card">
+					<h3>Make a booking</h3>
+					<p>View the online calendar and send a provisional enquiry, then complete a hire agreement.</p>
+					<a href="/bookings">Booking information</a>
+				</article>
+				<article class="card">
+					<h3>Find us</h3>
+					<p>{site.addressLines.join(", ")} {site.postcode}</p>
+					<a href="/find-us">Map and directions</a>
+				</article>
+				<article class="card">
+					<h3>Join in</h3>
+					<p>Scouts, yoga, art, bingo, the W.I. and more meet here each week.</p>
+					<a href="/organisation-contacts">Clubs &amp; contacts</a>
+				</article>
+			</div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="wrap">
+			<h2>Two halls, one kitchen</h2>
+			<p>The halls can be hired separately or together, with shared use of the kitchen and accessible toilets.</p>
+			<div class="grid grid-2" style="margin-top: 1.5rem;">
+				{
+					rooms.map((room) => (
+						<article class="card">
+							<h3>{room.name}</h3>
+							<p>{room.summary}</p>
+							<p class="meta">
+								{room.lengthM}m × {room.widthM}m
+							</p>
+							<a href="/facilities">Floor plan and photos</a>
+						</article>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section class="section section-navy">
+		<div class="wrap grid grid-2">
+			<div>
+				<h2>Latest news &amp; events</h2>
+				<p>Notices from the Council of Management, including the annual general meeting.</p>
+			</div>
+			<ul class="news-list">
+				{
+					news.map((post) => (
+						<li>
+							<a href={`/news/${post.slug}`}>
+								<p class="meta">{formatDate(post.date)}</p>
+								<h3>{post.title}</h3>
+								{post.body[0] && <p class="news-excerpt">{excerpt(post.body[0])}</p>}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+		<div class="wrap" style="margin-top: 1.5rem;">
+			<a class="button button-secondary" href="/news">All news</a>
+		</div>
+	</section>
+</BaseLayout>

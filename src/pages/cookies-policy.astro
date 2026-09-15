@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSite } from '../lib/cms';
+
+const site = await getSite();
+---
+
+<BaseLayout
+  title="Cookies policy"
+  description="How Leighs Village Hall uses cookies on this website."
+>
+  <section class="page-hero wrap prose">
+    <p class="kicker">Privacy</p>
+    <h1>Cookies policy</h1>
+    <p>
+      This website is a static brochure for {site.name}. It does not use advertising
+      cookies, analytics cookies, or other tracking cookies.
+    </p>
+    <p>
+      If you watch the videos on the facilities page, YouTube may set its own cookies.
+      Those videos are loaded from YouTube’s privacy-enhanced domain. You can also
+      watch them on YouTube instead.
+    </p>
+    <p>
+      The online booking calendar is provided by Hall Booking Online, which is a
+      separate website with its own privacy notice.
+    </p>
+    <p>
+      The map on the Find us page is provided by Google Maps. Loading that page
+      requests map tiles from Google.
+    </p>
+    <p>
+      Questions about this site can be sent to
+      <a href={`mailto:${site.email}`}>{site.email}</a>.
+    </p>
+  </section>
+</BaseLayout>

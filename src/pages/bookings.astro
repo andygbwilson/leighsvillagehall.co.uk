@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getDocuments, getSite } from '../lib/cms';
+
+const site = await getSite();
+const documents = getDocuments();
+---
+
+<BaseLayout
+  title="Bookings"
+  description="Make a provisional booking enquiry for Leighs Village Hall in Great Leighs, near Chelmsford."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">Hire the hall</p>
+    <h1>Make a provisional booking</h1>
+    <p>
+      You can view availability and make a provisional booking online. It is then
+      subject to confirmation by the booking secretary. A separate hire agreement
+      will be emailed to you for completion.
+    </p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap grid grid-2">
+      <article class="card">
+        <h2>Book online</h2>
+        <p>
+          Check the calendar, then submit a provisional booking. Please include your
+          postcode in the address field, and allow time for setting up and clearing away.
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href={site.bookingUrl} rel="noreferrer">View availability</a>
+          <a class="button button-secondary" href={site.bookingGuideUrl} rel="noreferrer">Booking guide</a>
+        </div>
+      </article>
+      <article class="card">
+        <h2>Speak to the booking secretary</h2>
+        <p>
+          If you would rather talk to someone first, call {site.bookingSecretary} on{' '}
+          <a href={site.phoneHref}>{site.phone}</a> or email{' '}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Hire documents</h2>
+      <p>Please read the conditions of hire before you book. Bookings of more than five hours require both halls.</p>
+      <ul>
+        {documents.map((doc) => (
+          <li><a href={doc.href}>{doc.title} (PDF)</a></li>
+        ))}
+        <li><a href={site.bookingDocsUrl} rel="noreferrer">Documents on the booking website</a></li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

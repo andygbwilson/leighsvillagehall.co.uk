@@ -1,0 +1,63 @@
+---
+import type { LightboxItem } from '../scripts/lightbox';
+
+type Props = {
+  heading: string;
+  items: LightboxItem[];
+  variant: 'photos' | 'videos';
+};
+
+const { heading, items, variant } = Astro.props as Props;
+const titleId = `${variant}-${heading.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-title`;
+---
+
+<div class="lightbox-root" data-lightbox>
+  <script type="application/json" set:html={JSON.stringify(items)} />
+
+  <div class={variant === 'photos' ? `gallery${items.length === 1 ? ' gallery-feature' : ''}` : 'video-grid'}>
+    {items.map((item: LightboxItem, index: number) =>
+      item.type === 'photo' ? (
+        <button type="button" class="gallery-trigger" data-lightbox-open={index} aria-label={item.alt}>
+          <img src={item.src} alt="" loading="lazy" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          class="video-trigger"
+          data-lightbox-open={index}
+          aria-label={`Play video: ${item.title}`}
+        >
+          <img
+            src={`https://i.ytimg.com/vi/${item.youtubeId}/hqdefault.jpg`}
+            alt=""
+            loading="lazy"
+          />
+          <span class="video-play" aria-hidden="true"></span>
+          <span class="video-trigger-label">{item.title}</span>
+        </button>
+      )
+    )}
+  </div>
+
+  <dialog class="lightbox" aria-labelledby={titleId}>
+    <div class="lightbox-panel">
+      <p class="visually-hidden" id={titleId}>{heading}</p>
+      <button type="button" class="lightbox-close" data-lightbox-close aria-label="Close">
+        Close
+      </button>
+      <button type="button" class="lightbox-nav lightbox-prev" data-lightbox-prev aria-label="Previous">
+        Previous
+      </button>
+      <div class="lightbox-stage" data-lightbox-stage></div>
+      <button type="button" class="lightbox-nav lightbox-next" data-lightbox-next aria-label="Next">
+        Next
+      </button>
+      <p class="lightbox-caption" data-lightbox-caption></p>
+      <p class="lightbox-counter" data-lightbox-counter></p>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  import '../scripts/lightbox';
+</script>

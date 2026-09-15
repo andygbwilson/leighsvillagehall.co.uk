@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getNews, getNewsBySlug } from '../../lib/cms';
+
+export async function getStaticPaths() {
+  const posts = await getNews();
+  return posts.map((post) => ({ params: { slug: post.slug } }));
+}
+
+const { slug } = Astro.params;
+const post = await getNewsBySlug(slug!);
+if (!post) {
+  throw new Error(`Unknown news post: ${slug}`);
+}
+---
+
+<BaseLayout title={post.title} description={post.body[0]}>
+  <article class="page-hero wrap prose">
+    <p class="kicker"><a href="/news">News</a></p>
+    <h1>{post.title}</h1>
+    <p class="meta">
+      {formatDate(post.date)}
+      {post.author ? ` · ${post.author}` : ''}
+    </p>
+    {post.body.map((paragraph) => <p>{paragraph}</p>)}
+  </article>
+</BaseLayout>

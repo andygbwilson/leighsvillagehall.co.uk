@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSite } from '../lib/cms';
+
+const site = await getSite();
+---
+
+<BaseLayout
+  title="Find us"
+  description="Directions to Leighs Village Hall, Boreham Road, Great Leighs, Chelmsford CM3 1NH."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">Great Leighs</p>
+    <h1>Find us</h1>
+    <p>
+      Leighs Village Hall is in the village of Great Leighs, midway between Chelmsford
+      and Braintree in Essex.
+    </p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap grid grid-2">
+      <article class="card">
+        <h2>Address</h2>
+        <p>
+          {site.name}<br />
+          {site.addressLines.map((line) => (
+            <>
+              {line}<br />
+            </>
+          ))}
+          {site.postcode}
+        </p>
+        <div class="actions">
+          <a class="button button-primary" href={site.mapDirectionsUrl} rel="noreferrer">Get directions</a>
+          <a class="button button-secondary" href={site.phoneHref}>{site.phone}</a>
+        </div>
+        <p class="meta" style="margin-top: 1rem;">
+          Two Blue Badge bays sit next to the entrance. The rest of the car park is unmarked —
+          please park courteously. The west end nearest Main Road is sometimes reserved for playing field users.
+        </p>
+      </article>
+      <iframe
+        class="map-frame"
+        src={site.mapEmbedUrl}
+        title="Map showing Leighs Village Hall on Boreham Road"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen
+      />
+    </div>
+  </section>
+</BaseLayout>

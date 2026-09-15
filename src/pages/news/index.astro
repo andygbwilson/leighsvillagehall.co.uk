@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getNews } from '../../lib/cms';
+
+const posts = await getNews();
+---
+
+<BaseLayout
+  title="Latest news & events"
+  description="News and event notices from Leighs Village Hall in Great Leighs."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">From the committee</p>
+    <h1>Latest news &amp; events</h1>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap">
+      <ul class="news-list">
+        {posts.map((post) => (
+          <li>
+            <a href={`/news/${post.slug}`}>
+              <p class="meta">{formatDate(post.date)}</p>
+              <h2>{post.title}</h2>
+              <p>{post.body[0]}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

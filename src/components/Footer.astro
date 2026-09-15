@@ -1,0 +1,35 @@
+---
+import { getFooterNav, getMainNav, getSite } from '../lib/cms';
+
+const site = await getSite();
+const nav = [...getMainNav(), ...getFooterNav()];
+---
+
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    <div>
+      <h2>{site.name}</h2>
+      <p>{site.addressLines.join(', ')} {site.postcode}</p>
+      <p>
+        <a href={site.phoneHref}>{site.phone}</a><br />
+        <a href={`mailto:${site.email}`}>{site.email}</a>
+      </p>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      {nav.map((item) => (
+        <a href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+    <div>
+      <h2>Hire the hall</h2>
+      <p>Provisional bookings are made online and confirmed by {site.bookingSecretary}.</p>
+      <p><a class="button button-primary" href={site.bookingUrl} rel="noreferrer">View availability</a></p>
+    </div>
+  </div>
+  <div class="wrap legal">
+    <p>
+      Charity no. {site.charityNumber}. Great Leighs, Chelmsford, Essex.
+      Copyright {new Date().getFullYear()} {site.name}. All rights reserved.
+    </p>
+  </div>
+</footer>

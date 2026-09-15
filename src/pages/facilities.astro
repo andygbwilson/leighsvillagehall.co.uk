@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Lightbox from '../components/Lightbox.astro';
+import { getGallery, getRooms, getVideos } from '../lib/cms';
+
+const rooms = await getRooms();
+const gallery = await getGallery();
+const videos = await getVideos();
+---
+
+<BaseLayout
+  title="Facilities"
+  description="Two function rooms, a large kitchen, a stage and accessible toilets at Leighs Village Hall in Great Leighs."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">The hall</p>
+    <h1>Facilities</h1>
+    <p>
+      The refurbished hall comprises two function rooms, a large fully equipped kitchen
+      and a curtained stage. The halls can be used separately or combined.
+    </p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap grid grid-2">
+      {rooms.map((room) => (
+        <article class="card">
+          <h2>{room.name}</h2>
+          <p>{room.summary}</p>
+          <p><strong>{room.lengthM}m long × {room.widthM}m wide</strong></p>
+          <ul>
+            {room.extras.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Village hall floor plan</h2>
+      <p>The plan shows the halls, kitchen, stage, toilets and step-free entrance.</p>
+      <Lightbox
+        heading="Village hall floor plan"
+        variant="photos"
+        items={[
+          {
+            type: 'photo',
+            src: '/images/floor-plan.jpg',
+            alt: 'Floor plan of Leighs Village Hall showing the main hall, small events room, kitchen, stage and toilets',
+          },
+        ]}
+      />
+    </div>
+  </section>
+
+  <section class="section section-paper" id="video">
+    <div class="wrap">
+      <h2>Video gallery</h2>
+      <Lightbox
+        heading="Video gallery"
+        variant="videos"
+        items={videos.map((video) => ({
+          type: 'video' as const,
+          youtubeId: video.youtubeId,
+          title: video.title,
+        }))}
+      />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Photo gallery</h2>
+      <Lightbox
+        heading="Photo gallery"
+        variant="photos"
+        items={gallery.map((image) => ({
+          type: 'photo' as const,
+          src: image.src,
+          alt: image.alt,
+        }))}
+      />
+    </div>
+  </section>
+</BaseLayout>

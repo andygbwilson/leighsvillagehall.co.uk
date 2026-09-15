@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getFaqs } from '../lib/cms';
+
+const faqs = await getFaqs();
+---
+
+<BaseLayout
+  title="Frequently asked questions"
+  description="Booking, parking, alcohol licensing and hall hire questions for Leighs Village Hall."
+>
+  <section class="page-hero wrap">
+    <p class="kicker">Help</p>
+    <h1>Frequently asked questions</h1>
+    <p>Select a question to view the answer.</p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap faq">
+      {faqs.map((item, index) => (
+        <details>
+          <summary>{index + 1}. {item.question}</summary>
+          <Fragment set:html={item.answerHtml} />
+        </details>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
