@@ -1,6 +1,6 @@
 # Leighs Village Hall
 
-Astro frontend for [leighsvillagehall.co.uk](https://www.leighsvillagehall.co.uk), ready to deploy as a **static site on the Cloudflare Workers free tier**, with **Sanity** as an optional CMS.
+Astro frontend for [leighsvillagehall.co.uk](https://www.leighsvillagehall.co.uk), ready to deploy as a **static site on the Cloudflare Workers free tier**, with **Sanity** as the CMS.
 
 The live WordPress site on AWS has been migrated: pages, news, FAQs, club contacts, hire PDFs, photos and floor plan. Hall hire stays on [Hall Booking Online](https://hallbookingonline.com/leighsvillagehall/) — that system is not replaced.
 
@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:4321. Content comes from `src/data/content.ts` until a Sanity project is connected.
+Open http://localhost:4321. Pages load published content from Sanity (`lc8qwfpd` / `production`). Hire PDFs and navigation stay in `src/data/content.ts`. `src/data/content.ts` is also the fallback if Sanity is unreachable.
 
 ```sh
 npm run build
@@ -49,13 +49,15 @@ npm run dev
 npm run seed
 ```
 
-5. Deploy the Studio to Sanity’s free hosting:
+5. Deploy the Studio to Sanity’s free hosting (needs your Sanity login, not the seed token):
 
 ```sh
 cd studio
 npx sanity login
 npm run deploy
 ```
+
+Studio URL: [https://leighsvillagehall.sanity.studio](https://leighsvillagehall.sanity.studio)
 
 When `PUBLIC_SANITY_PROJECT_ID` is set, `astro build` reads published content from the Sanity CDN. Trigger a Cloudflare rebuild from a Sanity webhook (see below) after editors publish.
 

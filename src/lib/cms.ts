@@ -20,7 +20,7 @@ const siteQuery = groq`*[_id == "siteSettings"][0]{
 }`;
 
 const roomsQuery = groq`*[_type == "room"] | order(order asc) {
-  name, slug, summary, lengthM, widthM, extras
+  name, "slug": slug.current, summary, lengthM, widthM, extras
 }`;
 
 const galleryQuery = groq`*[_type == "galleryImage"] | order(order asc) {

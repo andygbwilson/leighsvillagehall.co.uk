@@ -6,7 +6,7 @@
     "dev": "sanity dev",
     "start": "sanity start",
     "build": "sanity build",
-    "deploy": "sanity deploy",
+    "deploy": "sanity deploy --no-auto-updates",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

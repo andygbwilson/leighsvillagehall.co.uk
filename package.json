@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "deploy": "astro build && wrangler deploy",
     "studio": "npm run dev --prefix studio",
+    "studio:deploy": "npm run deploy --prefix studio",
     "seed": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/seed-sanity.mjs"
   },
   "dependencies": {

@@ -10,7 +10,7 @@ import {
   video,
 } from './schemaTypes';
 
-const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'yourProjectId';
+const projectId = process.env.SANITY_STUDIO_PROJECT_ID || 'lc8qwfpd';
 const dataset = process.env.SANITY_STUDIO_DATASET || 'production';
 
 export default defineConfig({
