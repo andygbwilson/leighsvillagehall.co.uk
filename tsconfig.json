@@ -5,5 +5,5 @@
     "jsxImportSource": "astro"
   },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "studio"]
+  "exclude": ["dist", "studio", "worker", "scripts"]
 }

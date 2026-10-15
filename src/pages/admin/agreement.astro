@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Hire agreement" description="Review a hire agreement for Leighs Village Hall." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1 data-admin-heading>Hire agreement</h1>
+    <p>Check the provisional booking, then send the hire agreement invite when you are ready.</p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap" data-admin-detail>
+      <div class="admin-toolbar">
+        <a class="button button-secondary" href="/admin/hire-agreements">All agreements</a>
+        <button class="button button-primary" type="button" data-admin-invite>Send invite</button>
+        <button class="button button-secondary" type="button" data-admin-edit>Edit</button>
+        <button class="button button-primary" type="button" data-admin-save hidden>Save changes</button>
+        <button class="button button-secondary" type="button" data-admin-cancel hidden>Cancel</button>
+        <button class="button button-secondary" type="button" data-admin-logout>Sign out</button>
+      </div>
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <div data-admin-view></div>
+      <form class="ha-form" data-admin-form hidden></form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-agreement';
+</script>

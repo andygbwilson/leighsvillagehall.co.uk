@@ -78,6 +78,30 @@ In the Cloudflare dashboard you can then:
 
 Until DNS is switched, test on the `*.workers.dev` URL Wrangler prints.
 
+## Hire agreement emails
+
+Provisional bookings still start on Hall Booking Online. When HBO emails `bookings@leighsvillagehall.co.uk`, Cloudflare Email Routing sends that message to this Worker. The Worker stores a draft hire agreement against the booking ID. Admins review it at `/admin/agreement?booking=15441` and send the hire-agreement invite from that page. The original HBO message is forwarded to `leighsvillagehall@gmail.com`.
+
+This needs **Workers Paid** (to send mail to hirers) and Email Service set up on the domain:
+
+1. Cloudflare dashboard → **Compute** → **Email Service** → **Email Routing** → onboard `leighsvillagehall.co.uk` (MX and SPF/DKIM records).
+2. Add and verify destination address `leighsvillagehall@gmail.com`.
+3. Onboard the domain for **Email Sending**, and send from `bookings@leighsvillagehall.co.uk`.
+4. Routing rule: `bookings@leighsvillagehall.co.uk` → **Send to a Worker** → `leighs-village-hall`.
+5. In Hall Booking Online, set the admin notification address to `bookings@leighsvillagehall.co.uk`.
+
+Do not also route `bookings@` to a mailbox on the same address, or invite mail could loop. Keep Gmail as the forward destination only.
+
+While testing, `HIRE_INVITE_ALLOWLIST` in `wrangler.jsonc` limits hire-agreement emails to those addresses (comma-separated). Bookings for other hirers are still stored. Clear the list to allow invites to every hirer.
+
+Admins can review agreements at `/admin/hire-agreements`. Records are read-only until they choose to edit. Set the password with `npx wrangler secret put HIRE_ADMIN_PASSWORD`. Locally it defaults to `lvh-admin-dev`. Local invite sends are logged, not delivered.
+
+Locally you can replay a booking email (no outbound send) with:
+
+```sh
+curl -X POST http://localhost:4321/api/booking-email --data-binary @scripts/fixtures/hbo-booking.txt
+```
+
 ## Cut over from AWS WordPress
 
 1. Confirm the Workers URL looks right (bookings still go to Hall Booking Online).

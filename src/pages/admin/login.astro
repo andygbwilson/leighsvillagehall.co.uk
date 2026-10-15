@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Bookings admin" description="Sign in to review hire agreements." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Council of Management</p>
+    <h1>Bookings admin</h1>
+    <p>Sign in to review hire agreements. This area is not linked from the public site.</p>
+  </section>
+
+  <section class="section section-paper">
+    <div class="wrap ha">
+      <form class="card ha-gate" data-admin-login>
+        <label class="ha-field">
+          <span>Password</span>
+          <input name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <p class="ha-banner is-error" data-admin-error hidden></p>
+        <div class="actions">
+          <button class="button button-primary" type="submit">Sign in</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-login';
+</script>

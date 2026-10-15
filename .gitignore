@@ -8,9 +8,12 @@ pnpm-debug.log*
 .env
 .env.production
 .env.local
+.dev.vars
 .DS_Store
 .idea/
 .wrangler/
+.data/
+.tmp-hire-agreement/
 studio/dist/
 studio/.sanity/
 _wp-scrape/

@@ -1,8 +1,27 @@
 {
-  "name": "leighs-village-hall",
-  "compatibility_date": "2026-09-14",
-  "assets": {
-    "directory": "./dist",
-    "not_found_handling": "404-page"
-  }
+	"name": "leighs-village-hall",
+	"main": "./worker/index.ts",
+	"compatibility_date": "2026-09-14",
+	"assets": {
+		"directory": "./dist",
+		"not_found_handling": "404-page",
+		"html_handling": "drop-trailing-slash",
+		"binding": "ASSETS",
+		"run_worker_first": ["/api/*", "/admin", "/admin/*"],
+	},
+	"kv_namespaces": [{ "binding": "HIRE_AGREEMENTS", "id": "ebff07abfd994ea380c87285d8a9479e" }],
+	"send_email": [
+		{
+			"name": "EMAIL",
+			"allowed_sender_addresses": ["bookings@leighsvillagehall.co.uk"],
+		},
+	],
+	"vars": {
+		"SITE_ORIGIN": "https://www.leighsvillagehall.co.uk",
+		"BOOKINGS_FROM": "bookings@leighsvillagehall.co.uk",
+		"BOOKINGS_FROM_NAME": "Leighs Village Hall",
+		"BOOKINGS_FORWARD_TO": "leighsvillagehall@gmail.com",
+		"BOOKING_SENDER_DOMAIN": "hallbookingonline.com",
+		"HIRE_INVITE_ALLOWLIST": "leighsvillagehall@gmail.com,andygbwilson@gmail.com,stuart@jasperhut.co.uk",
+	},
 }

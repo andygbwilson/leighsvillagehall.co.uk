@@ -26,6 +26,10 @@
 	box-sizing: border-box;
 }
 
+[hidden] {
+	display: none !important;
+}
+
 html {
 	scroll-behavior: smooth;
 }
@@ -319,6 +323,7 @@ h3 {
 	border-radius: var(--radius);
 	padding: 1.35rem;
 	box-shadow: var(--shadow);
+	margin: 0 0 1.5rem;
 }
 
 .card h2,
@@ -768,6 +773,264 @@ th {
 	border-top: 1px solid rgb(244 234 216 / 18%);
 	color: #d5dce8;
 	font-size: 0.95rem;
+}
+
+.ha-form fieldset.card,
+.ha-gate.card {
+	margin: 0 0 1.25rem;
+}
+
+.ha-form legend {
+	font-family: var(--font-serif);
+	font-size: 1.25rem;
+	font-weight: 700;
+	padding: 0 0.4rem;
+}
+
+.ha-form h3 {
+	margin: 0.25rem 0 1rem;
+}
+
+.ha-form .ha-field + h3,
+.ha-form .ha-choice-wrap + h3 {
+	margin-top: 1.5rem;
+}
+
+.ha-field {
+	display: grid;
+	gap: 0.35rem;
+	margin: 0 0 1rem;
+}
+
+.ha-field>span {
+	font-weight: 700;
+}
+
+.ha-field input,
+.ha-field textarea,
+.ha-gate input {
+	width: 100%;
+	font: inherit;
+	color: inherit;
+	padding: 0.65rem 0.75rem;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: white;
+}
+
+.ha-field input[type="radio"],
+.ha-field input[type="checkbox"],
+.ha-check input,
+.ha-choice input {
+	width: auto;
+}
+
+.ha-grid {
+	display: grid;
+	gap: 0 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.ha-grid-3 {
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.ha-postcode {
+	max-width: 12rem;
+}
+
+.ha-attending input {
+	max-width: 12rem;
+}
+
+.ha-postcode input {
+	text-transform: uppercase;
+}
+
+.ha-choice {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.7rem 1.25rem;
+}
+
+.ha-choice-wrap {
+	flex-direction: column;
+}
+
+.ha-choice label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	font-weight: 600;
+}
+
+.ha-check {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.65rem;
+	align-items: start;
+	margin: 0 0 1rem;
+}
+
+.ha-check input {
+	margin-top: 0.5rem;
+}
+
+.ha-banner {
+	margin-bottom: 1.25rem;
+	padding: 0.85rem 1rem;
+	border-radius: 12px;
+	background: var(--navy-soft);
+}
+
+.ha-banner.is-error {
+	background: #f4d4d6;
+	color: #6b1d22;
+}
+
+.ha-note {
+	color: var(--muted);
+	font-size: 1rem;
+}
+
+.ha-alert {
+	margin: 0 0 1.25rem;
+	padding: 0.9rem 1.05rem;
+	border-radius: 12px;
+	background: #fff3a3;
+	color: #c1121f;
+	font-weight: 600;
+}
+
+.ha-alert p {
+	margin: 0 0 0.75rem;
+}
+
+.ha-alert p:last-child {
+	margin: 0;
+}
+
+.ha-alert a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.ha-ref {
+	font-weight: 600;
+}
+
+.ha-success .actions {
+	margin-top: 1rem;
+}
+
+.ha-form .actions,
+.ha-gate .actions {
+	margin-top: 0.25rem;
+}
+
+.ha-form button,
+.ha-gate button,
+.admin-toolbar button {
+	font: inherit;
+	cursor: pointer;
+}
+
+.admin-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	gap: 0.75rem;
+	margin: 0 0 1.25rem;
+}
+
+.admin-search {
+	flex: 1 1 16rem;
+	margin: 0;
+}
+
+.admin-table-wrap {
+	overflow-x: auto;
+}
+
+.admin-table {
+	width: 100%;
+	border-collapse: collapse;
+	background: white;
+	border-radius: 16px;
+	overflow: hidden;
+}
+
+.admin-table th,
+.admin-table td {
+	text-align: left;
+	padding: 0.85rem 1rem;
+	border-bottom: 1px solid var(--line);
+	vertical-align: top;
+}
+
+.admin-table th {
+	font-size: 0.9rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--muted);
+}
+
+.admin-muted {
+	color: var(--muted);
+	font-size: 0.95rem;
+	margin-top: 0.2rem;
+}
+
+.admin-status {
+	display: inline-block;
+	padding: 0.2rem 0.65rem;
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 0.9rem;
+	background: var(--navy-soft);
+}
+
+.admin-status-submitted {
+	background: #dcead4;
+	color: #215c2a;
+}
+
+.admin-section {
+	margin: 0 0 1.25rem;
+}
+
+.admin-section h2 {
+	margin: 0 0 0.85rem;
+}
+
+.admin-meta {
+	margin: 0 0 1.25rem;
+}
+
+.admin-dl {
+	display: grid;
+	gap: 0.85rem 1.5rem;
+}
+
+.admin-dl>div {
+	display: grid;
+	grid-template-columns: minmax(10rem, 16rem) 1fr;
+	gap: 0.5rem 1rem;
+}
+
+.admin-dl dt {
+	font-weight: 700;
+}
+
+.admin-dl dd {
+	margin: 0;
+	white-space: pre-wrap;
+}
+
+@media (max-width: 700px) {
+	.admin-dl>div {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 860px) {

@@ -127,7 +127,7 @@ export const faqs: FaqItem[] = [
 		question: "How do I book the village hall?",
 		answerHtml: `<p>There are currently two options:</p>
 <ol>
-<li>You may use the <a href="https://hallbookingonline.com/leighsvillagehall/guide.php">online booking form</a> to provisionally book a slot subject to availability. The system will notify the booking secretary, who will then confirm the date and time and ensure you have completed the appropriate Hire Agreement and received a copy of the Conditions of Hire.</li>
+<li>You may use the <a href="https://hallbookingonline.com/leighsvillagehall/guide.php">online booking form</a> to provisionally book a slot subject to availability. The system will notify the booking secretary, who will then confirm the date and time. You will be sent a link to complete the <a href="/hire-agreement">hire agreement</a> online, using the booking number from that email.</li>
 <li>Contact Stuart Wilson (booking secretary) on <a href="tel:+441245364193">01245 364193</a>. A hire agreement form will be emailed or posted with a copy of the conditions of hire.</li>
 </ol>`,
 	},

@@ -1,0 +1,367 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import YesNo from "../components/YesNo.astro";
+import { getSite } from "../lib/cms";
+
+const site = await getSite();
+---
+
+<BaseLayout title="Hire agreement" description="Complete the Leighs Village Hall hire agreement after your booking has been confirmed.">
+	<section class="page-hero wrap" data-hire-hero>
+		<p class="kicker">Hire the hall</p>
+		<h1>Hire agreement</h1>
+		<p>
+			Please complete the sections of the hire agreement below that are not already filled in so we can finalise your booking. Use the link in
+			the email we send out after your provisional booking.
+		</p>
+	</section>
+
+	<section class="section section-paper">
+		<div class="wrap ha">
+			<form class="ha-gate card" data-hire-gate>
+				<h2>Your booking number</h2>
+				<p>This is the booking number from the hire agreement email.</p>
+				<label class="ha-field">
+					<span>Booking number</span>
+					<input name="bookingNumber" type="text" autocomplete="off" maxlength="40" required />
+				</label>
+				<div class="actions">
+					<button class="button button-primary" type="submit">Continue</button>
+				</div>
+			</form>
+
+			<div class="ha-banner" data-hire-banner hidden></div>
+
+			<form class="ha-form" data-hire-form hidden novalidate>
+				<input type="hidden" name="bookingNumber" />
+
+				<p class="ha-ref">Booking number <strong data-hire-ref></strong></p>
+
+				<fieldset class="card">
+					<legend>1. Leighs Village Hall Council of Management</legend>
+					<p>
+						This agreement, including the <a href="/documents/LVH-Conditions-of-Hire.pdf">Conditions of Hire</a>, is between the Council
+						of Management and the hirer named below.
+					</p>
+					<p>
+						<strong>Authorised representative:</strong><br />
+						{site.bookingSecretary}, Booking Secretary
+					</p>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>2. Hirer</legend>
+					<label class="ha-field">
+						<span>Name</span>
+						<input name="hirerName" type="text" autocomplete="name" required />
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Organisation (if applicable)</span>
+							<input name="organisation" type="text" autocomplete="organization" />
+						</label>
+						<label class="ha-field">
+							<span>Position (if applicable)</span>
+							<input name="position" type="text" />
+						</label>
+					</div>
+					<label class="ha-field">
+						<span>Address line 1</span>
+						<input name="addressLine1" type="text" autocomplete="address-line1" required />
+					</label>
+					<label class="ha-field">
+						<span>Address line 2 (optional)</span>
+						<input name="addressLine2" type="text" autocomplete="address-line2" />
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Town or city</span>
+							<input name="town" type="text" autocomplete="address-level2" required />
+						</label>
+						<label class="ha-field">
+							<span>County (optional)</span>
+							<input name="county" type="text" autocomplete="address-level1" />
+						</label>
+					</div>
+					<label class="ha-field ha-postcode">
+						<span>Postcode</span>
+						<input name="postcode" type="text" autocomplete="postal-code" required maxlength="10" spellcheck="false" />
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Telephone</span>
+							<input name="telephone" type="tel" autocomplete="tel" required />
+						</label>
+						<label class="ha-field">
+							<span>Email</span>
+							<input name="email" type="email" autocomplete="email" required />
+						</label>
+					</div>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>3. Period of hire</legend>
+					<p class="ha-note">
+						Times must include setting up and clearing away. If the building is not vacated by the time stated, additional charges may
+						apply.
+					</p>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Date</span>
+							<input name="hireDate" type="date" required />
+						</label>
+						<label class="ha-field">
+							<span>Time from</span>
+							<input name="timeFrom" type="time" required />
+						</label>
+						<label class="ha-field">
+							<span>Time to</span>
+							<input name="timeTo" type="time" required />
+						</label>
+					</div>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>4. Function</legend>
+					<div class="ha-alert" role="note">
+						<p>
+							All events must be supervised by adults over the age of 21 years. Your attention is drawn to para 3.3 of the <a
+								href="/documents/LVH-Conditions-of-Hire.pdf"
+								target="_blank">Conditions of Hire</a
+							>.
+						</p>
+					</div>
+
+					<label class="ha-field">
+						<span>Type of function (for example children’s party)</span>
+						<input name="functionType" type="text" required />
+					</label>
+					<label class="ha-field ha-attending">
+						<span>Total number attending</span>
+						<input name="numberAttending" type="number" min="0" inputmode="numeric" />
+					</label>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>6. Facilities and use</legend>
+					<p class="ha-note">
+						Please tell us about chairs, tables, children’s furniture, crockery and whether the stage needs to be cleared before the
+						event.
+					</p>
+					<p>
+						You <strong>MUST</strong> also seek approval for entertainment or activity such as an indoor bouncy castle. If approved, it is entirely
+						at your own risk. The hall is not insured for costs arising from such activities.
+					</p>
+					<p>If the hire exceeds 5 hours, including setting up and clearing away, you automatically have access to both halls.</p>
+					<div class="ha-grid">
+						<div class="ha-field">
+							<span>John Wright Hall (large)</span>
+							<YesNo name="johnWrightHall" />
+						</div>
+						<div class="ha-field">
+							<span>Brian Poultney Hall (small)</span>
+							<YesNo name="brianPoultneyHall" />
+						</div>
+						<div class="ha-field">
+							<span>Kitchen (sole use only if hiring both halls)</span>
+							<YesNo name="kitchen" />
+						</div>
+						<div class="ha-field">
+							<span>Stage</span>
+							<YesNo name="stage" />
+						</div>
+					</div>
+					<div class="ha-field">
+						<span>Are you hiring an inflatable?</span>
+						<YesNo name="inflatable" />
+					</div>
+					<div class="ha-alert" role="note" data-show-when="inflatable:yes" hidden>
+						<p>Please send public liability insurance certification to the booking secretary.</p>
+					</div>
+					<h3>Equipment</h3>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Large standard tables (20 in the large hall)</span>
+							<input name="largeTables" type="number" min="0" max="20" inputmode="numeric" />
+						</label>
+						<label class="ha-field">
+							<span>Standard chairs (max 100)</span>
+							<input name="standardChairs" type="number" min="0" max="100" inputmode="numeric" />
+						</label>
+						<label class="ha-field">
+							<span>Small tables (10 available)</span>
+							<input name="smallTables" type="number" min="0" max="10" inputmode="numeric" />
+						</label>
+						<label class="ha-field">
+							<span>Nursery tables (10 available)</span>
+							<input name="nurseryTables" type="number" min="0" max="10" inputmode="numeric" />
+						</label>
+						<label class="ha-field">
+							<span>Nursery chairs (40 available)</span>
+							<input name="nurseryChairs" type="number" min="0" max="40" inputmode="numeric" />
+						</label>
+						<div class="ha-field">
+							<span>Crockery (wash and store after use)</span>
+							<YesNo name="crockery" />
+						</div>
+					</div>
+					<label class="ha-field">
+						<span>Entertainment or other activity needing approval</span>
+						<textarea name="entertainment" rows="3" placeholder="Optional. For example a bouncy castle."></textarea>
+					</label>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>8. Music</legend>
+					<div class="ha-alert" role="note">
+						<p>
+							Please note that music <strong>MUST NOT</strong> be played after 23:00 hours (11pm). The hirer’s attention is drawn to the <a
+								href="/documents/LVH-Conditions-of-Hire.pdf"
+								target="_blank">conditions of hire</a
+							> document.
+						</p>
+						<p>
+							<strong>NB:</strong> We have very close neighbours on whose goodwill we rely. We face possible legal action from Chelmsford
+							City Council if we breach the agreed 11pm music deadline. This is a very serious matter and we will therefore <strong
+								>charge you £50</strong
+							>, if you exceed this time limit.
+						</p>
+					</div>
+					<div class="ha-field">
+						<span>Will music be played during the event?</span>
+						<YesNo name="musicPlayed" required />
+					</div>
+					<label class="ha-field">
+						<span>Time music will cease</span>
+						<input name="musicCeaseTime" type="time" max="23:00" data-required-when="musicPlayed:yes" />
+					</label>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>9. Consumption of alcohol</legend>
+					<p>The hall does not have an Alcohol Licence or a Designated Premises Supervisor in accordance with the Licensing Act 2003.</p>
+					<div class="ha-alert" role="note">
+						<p>
+							If you wish to sell alcohol at a function you <strong>MUST</strong> apply for a Temporary Events Notice from Chelmsford City
+							Council at least one month before the date of the event.
+						</p>
+					</div>
+					<p>
+						We will provide you with necessary form which should be completed and forwarded to Chelmsford City Council and Chelmsford
+						Police and will cost £21.00
+					</p>
+
+					<div class="ha-field">
+						<span>Will alcohol be consumed?</span>
+						<YesNo name="alcoholConsumed" required />
+					</div>
+					<div class="ha-field">
+						<span>Will the alcohol be sold or provided free?</span>
+						<div class="ha-choice">
+							<label>
+								<input type="radio" name="alcoholSupply" value="sold" data-required-when="alcoholConsumed:yes" />
+								Sold
+							</label>
+							<label>
+								<input type="radio" name="alcoholSupply" value="free" data-required-when="alcoholConsumed:yes" />
+								Free
+							</label>
+						</div>
+					</div>
+					<label class="ha-check" data-show-when="alcoholSupply:sold">
+						<input name="tenAcknowledged" type="checkbox" value="true" data-required-when="alcoholSupply:sold" />
+						<span> I will apply for a Temporary Event Notice from Chelmsford City Council at least one month before the event. </span>
+					</label>
+
+					<p class="ha-note">
+						You may allow <strong>ADULTS</strong> to bring alcohol for their own consumption without a Temporary Event Notice. Serving must
+						stop at least half an hour before the hire ends, so the bar and waste can be cleared. Extra charges apply if the hall is not vacated
+						at the agreed time.
+					</p>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>10. Cancellation and signature</legend>
+					<p>
+						We do not charge for cancellation. If you no longer need the hall, please tell us as soon as you can, by email to <a
+							href={`mailto:${site.email}`}>{site.email}</a
+						>.
+					</p>
+					<div class="ha-field">
+						<span>Payment</span>
+						<div class="ha-choice ha-choice-wrap">
+							<label>
+								<input type="radio" name="paymentMethod" value="cash" />
+								Cash
+							</label>
+							<label>
+								<input type="radio" name="paymentMethod" value="cheque" />
+								Cheque
+							</label>
+							<label>
+								<input type="radio" name="paymentMethod" value="bank" />
+								Online banking
+							</label>
+							<p class="ha-banner" data-show-when="paymentMethod:bank" hidden>
+								<strong>Lloyds Bank details</strong>
+								<br /><strong>Account name:</strong> Leighs Village Hall <br /><strong>Sort code:</strong> 30-91-14 <br /><strong
+									>Account number:</strong
+								> 01082775.<br />Please use your surname and the booking date as the reference.
+							</p>
+							<label>
+								<input type="radio" name="paymentMethod" value="later" />
+								Arrange with the booking secretary
+							</label>
+						</div>
+					</div>
+					<h3>Agree Terms</h3>
+					<label class="ha-check">
+						<input name="publicLiabilityRead" type="checkbox" value="true" />
+						<span>I have read the terms of the hirer’s public liability insurance (available on request).</span>
+					</label>
+					<label class="ha-check">
+						<input name="healthSafetyAgreed" type="checkbox" value="true" />
+						<span>I agree to follow any health and safety rules in force at the date of hire.</span>
+					</label>
+					<label class="ha-check">
+						<input name="conditionsAgreed" type="checkbox" value="true" required />
+						<span>
+							I have read and understood the <a href="/documents/LVH-Conditions-of-Hire.pdf">Conditions of Hire</a> and agree that additional
+							charges shown in paragraph 9 of those conditions can be recovered from me.
+						</span>
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Contact mobile number</span>
+							<input name="mobile" type="tel" autocomplete="tel" required />
+						</label>
+						<label class="ha-field">
+							<span>Date</span>
+							<input name="signedDate" type="date" required />
+						</label>
+					</div>
+				</fieldset>
+
+				<p class="ha-note">
+					Details are stored against this booking number for the Council of Management. They are not sent to Hall Booking Online.
+				</p>
+				<div class="actions">
+					<button class="button button-primary" type="submit">Submit hire agreement</button>
+				</div>
+			</form>
+
+			<div class="card ha-success" data-hire-success hidden>
+				<h2>Thank you</h2>
+				<p data-hire-success-copy></p>
+				<div class="actions">
+					<a class="button button-secondary" href="/bookings">Back to bookings</a>
+					<a class="button button-primary" href="/documents/LVH-Conditions-of-Hire.pdf">Conditions of Hire</a>
+				</div>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<script>
+	import "../scripts/hire-agreement";
+</script>

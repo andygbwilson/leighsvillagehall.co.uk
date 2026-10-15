@@ -1,0 +1,29 @@
+There is a new booking for Leighs Village Hall. This is the information:
+
+Date: Sat 19 December 2026
+Time: From 1:00pm to 10:30pm
+Name: Comet Lawal
+Event Title: 40th birthday party
+Facilities: John Wright Hall(large) & Brian Poultney Hall(small
+Number Attending: 120
+
+Contact Info
+
+cometlawal@gmail.com
+07469361841
+53 Melbourne Avenue
+
+Notes: 40th Birthday Party
+
+Follow this link to view or approve the booking:
+
+https://hallbookingonline.com/booking/admin/unapproved.php?action=review&form_type=review_booking&id=15441&stamp=bdef9e3d5456aef10ef7
+
+
+------------------------------------
+Original Booking Data
+ID : 15441
+>From : 13:00
+To : 22:30
+Date : 2026-12-19
+Facilities : N97XeZ71 7JoPyqnH

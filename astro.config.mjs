@@ -1,10 +1,82 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import {
+  handleAdminDevApi,
+  ingestHboBookingEmail,
+  loadHireAgreement,
+  saveHireAgreement,
+} from './scripts/hire-agreement-dev.ts';
+
+function hireAgreementDevApi() {
+  return {
+    name: 'hire-agreement-dev-api',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = new URL(req.url ?? '/', 'http://localhost');
+        if (await handleAdminDevApi(req, res, url)) return;
+
+        if (url.pathname === '/api/booking-email' && req.method === 'POST') {
+          const chunks = [];
+          for await (const chunk of req) chunks.push(chunk);
+          const raw = Buffer.concat(chunks).toString('utf8') || '{}';
+          const body = raw.trim().startsWith('{') ? JSON.parse(raw) : { text: raw };
+          const record = await ingestHboBookingEmail(String(body.text ?? body.body ?? raw));
+          res.end(JSON.stringify({ ok: true, record }));
+          return;
+        }
+
+        if (url.pathname !== '/api/hire-agreement') {
+          next();
+          return;
+        }
+
+        res.setHeader('content-type', 'application/json; charset=utf-8');
+        res.setHeader('cache-control', 'no-store');
+
+        try {
+          if (req.method === 'GET') {
+            const booking = url.searchParams.get('booking') ?? '';
+            const record = booking ? await loadHireAgreement(booking) : null;
+            res.end(JSON.stringify({ found: Boolean(record), record }));
+            return;
+          }
+
+          if (req.method === 'POST') {
+            const chunks = [];
+            for await (const chunk of req) chunks.push(chunk);
+            const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+            const record = await saveHireAgreement(body);
+            res.end(JSON.stringify({ ok: true, record }));
+            return;
+          }
+
+          res.statusCode = 405;
+          res.end(JSON.stringify({ error: 'Method not allowed.' }));
+        } catch (error) {
+          res.statusCode = 400;
+          res.end(
+            JSON.stringify({
+              error: error instanceof Error ? error.message : 'The hire agreement could not be saved.',
+            }),
+          );
+        }
+      });
+    },
+  };
+}
 
 export default defineConfig({
   site: 'https://www.leighsvillagehall.co.uk',
-  integrations: [sitemap()],
+  trailingSlash: 'never',
+  integrations: [
+    sitemap({
+      filter: (page) => !new URL(page).pathname.startsWith('/admin'),
+    }),
+  ],
+  vite: {
+    plugins: [hireAgreementDevApi()],
+  },
   redirects: {
     '/latest-news': '/news',
     '/contact': '/organisation-contacts',
