@@ -1,8 +1,8 @@
 import type { HireAgreementRecord, HireAgreementSummary, PaymentMethod } from "./hire-agreement";
-import { agreementSummary } from "./hire-agreement";
+import { agreementSummary, formatMoney } from "./hire-agreement";
 
 export const ADMIN_COOKIE = "lvh_admin";
-export const ADMIN_HOME = "/admin/hire-agreements";
+export const ADMIN_HOME = "/admin/bookings";
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function isAdminLoginPath(pathname: string): boolean {
@@ -88,6 +88,7 @@ export const ADMIN_FIELD_GROUPS: AdminFieldGroup[] = [
 	{
 		title: "Hiring charge",
 		fields: [
+			{ key: "depositDue", label: "Deposit due", type: "text" },
 			{ key: "amountPaid", label: "Amount paid", type: "text" },
 			{ key: "balanceDue", label: "Balance due", type: "text" },
 		],
@@ -112,6 +113,7 @@ export function formatAgreementValue(key: keyof HireAgreementRecord, value: Hire
 	if (typeof value !== "string" || !value.trim()) return "—";
 
 	if (key === "hireDate" || key === "signedDate") return formatDisplayDate(value);
+	if (key === "depositDue" || key === "amountPaid" || key === "balanceDue") return formatMoney(value);
 	if (key === "alcoholSupply") return value === "sold" ? "Sold" : value === "free" ? "Free" : value;
 	if (key === "paymentMethod") return paymentLabel(value as PaymentMethod);
 	return value;

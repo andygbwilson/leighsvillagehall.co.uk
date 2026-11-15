@@ -46,6 +46,7 @@ export type HireAgreementRecord = {
   alcoholSupply: AlcoholSupply;
   tenAcknowledged: boolean;
   paymentMethod: PaymentMethod;
+  depositDue: string;
   amountPaid: string;
   balanceDue: string;
   publicLiabilityRead: boolean;
@@ -86,6 +87,16 @@ const STRING_FIELDS = [
   'musicCeaseTime',
   'signedDate',
   'mobile',
+  'depositDue',
+  'amountPaid',
+  'balanceDue',
+] as const;
+
+export const PUBLIC_LOCKED_FIELDS = [
+  'hireDate',
+  'timeFrom',
+  'timeTo',
+  'depositDue',
   'amountPaid',
   'balanceDue',
 ] as const;
@@ -150,6 +161,7 @@ export function emptyHireAgreement(bookingNumber = ''): HireAgreementRecord {
     alcoholSupply: '',
     tenAcknowledged: false,
     paymentMethod: '',
+    depositDue: '',
     amountPaid: '',
     balanceDue: '',
     publicLiabilityRead: false,
@@ -242,7 +254,13 @@ export function normaliseHireAgreement(record: HireAgreementRecord): HireAgreeme
         postcode: record.postcode ? normalisePostcode(record.postcode) : '',
       }
     : splitAddress(record.address ?? '');
-  const next = { ...record, ...structured };
+  const next = {
+    ...record,
+    ...structured,
+    depositDue: record.depositDue ?? '',
+    amountPaid: record.amountPaid ?? '',
+    balanceDue: record.balanceDue ?? '',
+  };
   next.address = formatAddress(next);
   return next;
 }
@@ -268,6 +286,26 @@ function asAlcoholSupply(value: unknown): AlcoholSupply {
 function asPaymentMethod(value: unknown): PaymentMethod {
   const text = asString(value);
   return text === 'cash' || text === 'cheque' || text === 'bank' || text === 'later' ? text : '';
+}
+
+export function formatMoney(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const numeric = trimmed.replace(/^£\s*/, '').replace(/,/g, '').trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(numeric)) return trimmed;
+  const amount = Number(numeric);
+  return `£${amount.toLocaleString('en-GB', {
+    minimumFractionDigits: amount % 1 ? 2 : 0,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+export function omitPublicLockedFields(payload: HireAgreementPayload): HireAgreementPayload {
+  const next = { ...payload };
+  for (const field of PUBLIC_LOCKED_FIELDS) {
+    delete next[field];
+  }
+  return next;
 }
 
 export function parsePayload(input: unknown): HireAgreementPayload {

@@ -1,0 +1,58 @@
+---
+type Props = { admin?: boolean };
+const { admin = false } = Astro.props;
+---
+
+<div class="cal-card" data-booking-calendar data-admin={admin ? 'true' : undefined}>
+  <p class="cal-notice">
+    Please note that you must leave a <strong>minimum of 30 minutes</strong> both prior to and following an existing
+    booking (<strong>60 minutes</strong> preceding or following a party). The use of the kitchen is included on a shared
+    basis if a single hall is booked.
+  </p>
+  <div class="cal-toolbar">
+    <div class="cal-nav">
+      <button class="button button-secondary" type="button" data-cal-prev aria-label="Previous">‹</button>
+      <button class="button button-secondary" type="button" data-cal-today>Today</button>
+      <button class="button button-secondary" type="button" data-cal-next aria-label="Next">›</button>
+      <label class="cal-select">
+        <span class="visually-hidden">Month</span>
+        <select data-cal-month></select>
+      </label>
+      <label class="cal-select">
+        <span class="visually-hidden">Year</span>
+        <select data-cal-year></select>
+      </label>
+    </div>
+    <h2 data-cal-title>Availability</h2>
+    <div class="cal-views" role="tablist" aria-label="Calendar view">
+      <button class="button button-secondary" type="button" data-cal-view-btn="month">Month</button>
+      <button class="button button-secondary" type="button" data-cal-view-btn="week">Week</button>
+      <button class="button button-secondary" type="button" data-cal-view-btn="day">Day</button>
+      <button class="button button-secondary" type="button" data-cal-view-btn="list">List</button>
+    </div>
+  </div>
+  <div class="cal-filter-row">
+    <label class="cal-select">
+      <span>Displaying</span>
+      <select data-cal-room>
+        <option value="">All rooms</option>
+      </select>
+    </label>
+    <ul class="cal-legend" data-cal-legend></ul>
+  </div>
+  <p class="ha-note" data-cal-note></p>
+  <div data-cal-stage></div>
+  <dialog class="cal-overview" data-cal-overview>
+    <form method="dialog">
+      <header class="cal-overview-head" data-cal-overview-head>
+        <h3 data-cal-overview-title>Booking</h3>
+        <button class="cal-overview-x" type="submit" aria-label="Close">×</button>
+      </header>
+      <div class="cal-overview-body" data-cal-overview-body></div>
+      <div class="cal-overview-actions">
+        <a class="button button-primary" data-cal-overview-open hidden href="/admin/bookings">Open booking</a>
+        <button class="button button-secondary" type="submit">Close</button>
+      </div>
+    </form>
+  </dialog>
+</div>

@@ -23,5 +23,30 @@
 		"BOOKINGS_FORWARD_TO": "leighsvillagehall@gmail.com",
 		"BOOKING_SENDER_DOMAIN": "hallbookingonline.com",
 		"HIRE_INVITE_ALLOWLIST": "leighsvillagehall@gmail.com,andygbwilson@gmail.com,stuart@jasperhut.co.uk",
+		"HIRE_ADMIN_EMAIL": "leighsvillagehall@gmail.com",
+		"HIRE_ADMIN_EXTRA": "andygbwilson@gmail.com",
+	},
+	"env": {
+		"staging": {
+			"name": "leighs-village-hall-staging",
+			"workers_dev": true,
+			"kv_namespaces": [{ "binding": "HIRE_AGREEMENTS", "id": "44f78c15e7074da4857fb9a96637b14f" }],
+			"send_email": [
+				{
+					"name": "EMAIL",
+					"allowed_sender_addresses": ["bookings@leighsvillagehall.co.uk"],
+				},
+			],
+			"vars": {
+				"SITE_ORIGIN": "https://staging.leighsvillagehall.co.uk",
+				"BOOKINGS_FROM": "bookings@leighsvillagehall.co.uk",
+				"BOOKINGS_FROM_NAME": "Leighs Village Hall",
+				"BOOKINGS_FORWARD_TO": "leighsvillagehall@gmail.com",
+				"BOOKING_SENDER_DOMAIN": "hallbookingonline.com",
+				"HIRE_INVITE_ALLOWLIST": "leighsvillagehall@gmail.com,andygbwilson@gmail.com,stuart@jasperhut.co.uk",
+				"HIRE_ADMIN_EMAIL": "leighsvillagehall@gmail.com",
+				"HIRE_ADMIN_EXTRA": "andygbwilson@gmail.com",
+			},
+		},
 	},
 }

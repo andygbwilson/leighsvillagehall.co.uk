@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import {
   handleAdminDevApi,
+  handleDevBookingApi,
   ingestHboBookingEmail,
   loadHireAgreement,
   saveHireAgreement,
@@ -14,6 +15,7 @@ function hireAgreementDevApi() {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const url = new URL(req.url ?? '/', 'http://localhost');
+        if (await handleDevBookingApi(req, res, url)) return;
         if (await handleAdminDevApi(req, res, url)) return;
 
         if (url.pathname === '/api/booking-email' && req.method === 'POST') {
@@ -67,7 +69,7 @@ function hireAgreementDevApi() {
 }
 
 export default defineConfig({
-  site: 'https://www.leighsvillagehall.co.uk',
+  site: process.env.PUBLIC_SITE_ORIGIN || 'https://www.leighsvillagehall.co.uk',
   trailingSlash: 'never',
   integrations: [
     sitemap({

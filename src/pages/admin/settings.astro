@@ -1,0 +1,154 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Booking settings" description="Set booking rules for Leighs Village Hall." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1>Booking settings</h1>
+    <p>Adjust all settings below, then click Save all settings at the bottom. Public requests follow these rules; administrators are not bound by opening hours, notice, gaps or minimum duration.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap">
+      <AdminNav />
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <form class="ha-form booking-settings" data-admin-settings>
+        <div class="settings-grid">
+          <article class="settings-card">
+            <header class="settings-card-head is-hours">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Opening hours
+              </h2>
+              <button class="settings-help" type="button" popovertarget="help-hours" aria-label="About opening hours">?</button>
+            </header>
+            <div class="settings-card-body">
+              <div class="ha-grid">
+                <label class="ha-field"><span>Open from</span><input name="openFrom" type="time" required /></label>
+                <label class="ha-field"><span>Open until</span><input name="openTo" type="time" required /></label>
+              </div>
+              <p class="ha-note">Note: this does not apply to administrator bookings.</p>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <header class="settings-card-head is-dates">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 3v4M16 3v4M4 10h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Date limits
+              </h2>
+              <button class="settings-help" type="button" popovertarget="help-dates" aria-label="About date limits">?</button>
+            </header>
+            <div class="settings-card-body">
+              <label class="ha-field">
+                <span>Hirers can book up to</span>
+                <select name="publicBookUntilYear" required></select>
+              </label>
+              <label class="ha-field">
+                <span>Admin calendar open until</span>
+                <input name="adminBookUntil" type="date" required />
+              </label>
+              <p class="ha-note">Existing bookings are not affected. Administrators can always book beyond the public date.</p>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <header class="settings-card-head is-notice">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 20a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Minimum notice
+              </h2>
+              <button class="settings-help" type="button" popovertarget="help-notice" aria-label="About minimum notice">?</button>
+            </header>
+            <div class="settings-card-body">
+              <label class="ha-field">
+                <span>Days notice required</span>
+                <input name="noticeDays" type="number" min="0" required />
+              </label>
+              <p class="ha-note">Enter 0 for no minimum. Administrators are not bound by this.</p>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <header class="settings-card-head is-gap">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12H3m0 0 3-3M3 12l3 3M16 12h5m0 0-3-3m3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Gap between bookings
+              </h2>
+              <button class="settings-help" type="button" popovertarget="help-gap" aria-label="About the gap between bookings">?</button>
+            </header>
+            <div class="settings-card-body">
+              <label class="ha-field">
+                <span>Minutes between bookings</span>
+                <input name="gapMinutes" type="number" min="0" placeholder="Leave blank for back-to-back" />
+              </label>
+              <p class="ha-note">Useful for cleaning or set-up time between events. Leave blank for back-to-back bookings. Administrators are not bound by this.</p>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <header class="settings-card-head is-duration">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M8 20h8M8 4c0 6 8 6 8 16M16 4C16 10 8 10 8 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Minimum duration
+              </h2>
+              <button class="settings-help" type="button" popovertarget="help-duration" aria-label="About minimum duration">?</button>
+            </header>
+            <div class="settings-card-body">
+              <label class="ha-field">
+                <span>Minimum booking length (minutes)</span>
+                <input name="minDurationMinutes" type="number" min="0" required />
+              </label>
+              <p class="ha-note">Enter 0 for no minimum. Administrators are not bound by this.</p>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <header class="settings-card-head is-calendar">
+              <h2>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M12 4v16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Admin calendar
+              </h2>
+            </header>
+            <div class="settings-card-body">
+              <label class="ha-check">
+                <input name="highlightProvisional" type="checkbox" value="yes" />
+                <span>Highlight provisional bookings</span>
+              </label>
+              <p class="ha-note">Requested and held dates show with a dashed outline on the calendar.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="settings-save">
+          <button class="button button-success" type="submit">Save all settings</button>
+        </div>
+        <div class="settings-footer">
+          <a class="button button-secondary" href="/admin/bookings">Back to requests</a>
+          <a class="button button-primary" href="/admin/calendar">Manage bookings</a>
+        </div>
+      </form>
+
+      <div id="help-hours" popover class="settings-popover">
+        <p>Opening hours only apply to public booking requests. Held dates and club series you add as an administrator can start or finish outside these times.</p>
+      </div>
+      <div id="help-dates" popover class="settings-popover">
+        <p>Hirers can only request dates up to the end of the chosen year. Existing bookings stay on the calendar. The admin calendar can stay open later so you can copy clubs into the following year.</p>
+      </div>
+      <div id="help-notice" popover class="settings-popover">
+        <p>Public requests must be at least this many days in the future. Use 0 if same-day requests are allowed. Administrators can still hold earlier dates.</p>
+      </div>
+      <div id="help-gap" popover class="settings-popover">
+        <p>The calendar will not let a public request sit this close to another booking of the same hall. Leave the field blank, or enter 0, for back-to-back bookings. Administrators are not bound by this.</p>
+      </div>
+      <div id="help-duration" popover class="settings-popover">
+        <p>Public requests shorter than this will be rejected. Use 0 for no minimum. Administrators are not bound by this.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-settings';
+</script>

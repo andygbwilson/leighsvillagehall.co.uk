@@ -1,4 +1,4 @@
-import { safeAdminNext } from '../lib/hire-admin';
+import { safeAdminNext } from '../lib/admin-auth';
 
 export function bindAdminLogout() {
   document.querySelectorAll('[data-admin-logout]').forEach((button) => {

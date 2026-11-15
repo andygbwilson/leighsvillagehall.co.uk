@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Admin accounts" description="Manage bookings admin accounts." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1>Admin accounts</h1>
+    <p>The hall Gmail address is the booking secretary. Full-access admins can sign in with their own email. Accounting can have a separate login.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap" data-admin-accounts>
+      <AdminNav />
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-admin-rows></tbody>
+        </table>
+      </div>
+      <form class="ha-form card mt-4" data-admin-account-form>
+        <h2>Add account</h2>
+        <div class="ha-grid">
+          <label class="ha-field"><span>Name</span><input name="name" required /></label>
+          <label class="ha-field"><span>Email</span><input name="email" type="email" required /></label>
+          <label class="ha-field"><span>Password</span><input name="password" type="password" minlength="8" required /></label>
+          <label class="ha-field">
+            <span>Role</span>
+            <select name="role">
+              <option value="booking_secretary">Booking secretary</option>
+              <option value="accounting">Accounting</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button class="button button-primary" type="submit">Add account</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-accounts';
+</script>

@@ -1,42 +1,158 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import BookingCalendar from "../components/BookingCalendar.astro";
 import { getDocuments, getSite } from "../lib/cms";
 
 const site = await getSite();
 const documents = getDocuments();
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 ---
 
-<BaseLayout title="Bookings" description="Make a provisional booking enquiry for Leighs Village Hall in Great Leighs, near Chelmsford.">
+<BaseLayout title="Bookings" description="Request a booking of Leighs Village Hall in Great Leighs, near Chelmsford.">
 	<section class="page-hero wrap">
 		<p class="kicker">Hire the hall</p>
-		<h1>Make a provisional booking</h1>
+		<h1>Request a booking</h1>
 		<p>
-			You can view availability and make a provisional booking online. It is then subject to confirmation by the
-			booking secretary. Once confirmed, you will be sent a link to complete the hire agreement online.
+			Check the calendar, then send a request. The booking secretary will review it before sending you a hire agreement. Times must include
+			setting up and clearing away.
 		</p>
+		<div class="actions">
+			<a class="button button-primary" href="/bookings/access">Review your bookings</a>
+		</div>
+	</section>
+
+	<section class="section section-paper">
+		<div class="wrap">
+			<div class="admin-calendar-return" data-admin-return hidden>
+				<p>You are signed in as an admin.</p>
+				<a class="button button-sm button-secondary" href="/admin/calendar">Back to admin calendar</a>
+			</div>
+			<BookingCalendar />
+		</div>
+	</section>
+
+	<section class="section" id="enquiry">
+		<div class="wrap ha">
+			<header class="booking-enquiry-head">
+				<p class="kicker">Provisional booking</p>
+				<h2>Make a Booking Enquiry</h2>
+				<p>Send a request for the date and halls you need. The booking secretary will review it before sending a hire agreement.</p>
+			</header>
+			<form class="ha-form" data-booking-form data-turnstile-sitekey={turnstileSiteKey || undefined}>
+				<div class="ha-banner is-error" data-booking-banner hidden></div>
+				<fieldset class="card">
+					<legend>When and which hall</legend>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Date</span>
+							<input name="hireDate" type="date" required />
+						</label>
+						<label class="ha-field">
+							<span>Time from</span>
+							<input name="timeFrom" type="time" required />
+						</label>
+						<label class="ha-field">
+							<span>Time to</span>
+							<input name="timeTo" type="time" required />
+						</label>
+					</div>
+					<div class="ha-choice" data-room-choices>
+						<label>
+							<input type="checkbox" name="rooms" value="john" />
+							John Wright Hall (large)
+						</label>
+						<label>
+							<input type="checkbox" name="rooms" value="brian" />
+							Brian Poultney Hall (small)
+						</label>
+					</div>
+					<label class="ha-check">
+						<input name="isRecurring" type="checkbox" value="true" />
+						<span>Is this a recurring booking?</span>
+					</label>
+					<div class="ha-grid" data-recurrence-fields hidden>
+						<label class="ha-field">
+							<span>How often</span>
+							<select name="recurrence">
+								<option value="">Choose weekly or monthly</option>
+								<option value="weekly">Weekly</option>
+								<option value="monthly">Monthly</option>
+							</select>
+						</label>
+						<label class="ha-field">
+							<span>Until (optional)</span>
+							<input name="recurrenceUntil" type="date" />
+						</label>
+					</div>
+					<p class="ha-note">The booking secretary will confirm whether a recurring booking is possible.</p>
+				</fieldset>
+
+				<fieldset class="card">
+					<legend>Your details</legend>
+					<label class="ha-field">
+						<span>Name</span>
+						<input name="hirerName" type="text" autocomplete="name" required />
+					</label>
+					<label class="ha-field">
+						<span>Organisation (if applicable)</span>
+						<input name="organisation" type="text" autocomplete="organization" />
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Email</span>
+							<input name="email" type="email" autocomplete="email" required />
+						</label>
+						<label class="ha-field">
+							<span>Telephone</span>
+							<input name="telephone" type="tel" autocomplete="tel" required />
+						</label>
+					</div>
+					<label class="ha-field">
+						<span>Address line 1</span>
+						<input name="addressLine1" type="text" autocomplete="address-line1" />
+					</label>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Town or city</span>
+							<input name="town" type="text" autocomplete="address-level2" />
+						</label>
+						<label class="ha-field ha-postcode">
+							<span>Postcode</span>
+							<input name="postcode" type="text" autocomplete="postal-code" maxlength="10" />
+						</label>
+					</div>
+					<label class="ha-field">
+						<span>Type of function</span>
+						<input name="functionType" type="text" placeholder="For example a children’s party" />
+					</label>
+					<label class="ha-field ha-attending">
+						<span>Total number attending</span>
+						<input name="numberAttending" type="number" min="0" inputmode="numeric" />
+					</label>
+					<label class="ha-field">
+						<span>Anything else we should know</span>
+						<textarea name="notes" rows="3"></textarea>
+					</label>
+				</fieldset>
+				{turnstileSiteKey ? (
+					<div class="ha-turnstile">
+						<p class="ha-note">Please complete the check below. It helps us stop spam enquiries.</p>
+						<div data-turnstile></div>
+					</div>
+				) : null}
+				<div class="actions">
+					<button class="button button-primary" type="submit">Send enquiry</button>
+				</div>
+			</form>
+			<div class="card ha-success" data-booking-success hidden>
+				<h2>Thank you</h2>
+				<p data-booking-success-copy></p>
+			</div>
+		</div>
 	</section>
 
 	<section class="section section-paper">
 		<div class="wrap grid grid-2">
-			<article class="card">
-				<h2>Book online</h2>
-				<p>
-					Check the calendar, then submit a provisional booking. Please include your postcode in the address field, and allow time for
-					setting up and clearing away.
-				</p>
-				<div class="actions">
-					<a class="button button-primary" href={site.bookingUrl} rel="noreferrer">View availability</a>
-					<a class="button button-secondary" href={site.bookingGuideUrl} rel="noreferrer">Booking guide</a>
-				</div>
-			</article>
-			<article class="card">
-				<h2>Hire agreement</h2>
-				<p>
-					After confirmation, you will be emailed a link to complete the hire agreement. It uses your booking
-					number so we can keep the details with that booking. Facilities in section 6 can be added later if
-					you need time to decide.
-				</p>
-			</article>
 			<article class="card">
 				<h2>Speak to the booking secretary</h2>
 				<p>
@@ -45,23 +161,23 @@ const documents = getDocuments();
 					<a href={`mailto:${site.email}`}>{site.email}</a>.
 				</p>
 			</article>
-		</div>
-	</section>
-
-	<section class="section">
-		<div class="wrap">
-			<h2>Hire documents</h2>
-			<p>Please read the conditions of hire before you book. Bookings of more than five hours require both halls.</p>
-			<ul>
-				{
-					documents.map((doc) => (
+			<article class="card">
+				<h2>Hire documents</h2>
+				<p>Please read the conditions of hire before you book. Bookings of more than five hours require both halls.</p>
+				<ul>
+					{documents.map((doc) => (
 						<li>
 							<a href={doc.href}>{doc.title} (PDF)</a>
 						</li>
-					))
-				}
-				<li><a href={site.bookingDocsUrl} rel="noreferrer" target="_blank">Documents on the booking website</a></li>
-			</ul>
+					))}
+				</ul>
+			</article>
 		</div>
 	</section>
 </BaseLayout>
+
+<script>
+	import "../scripts/booking-calendar";
+	import "../scripts/booking-form";
+	import "../scripts/booking-admin-return";
+</script>

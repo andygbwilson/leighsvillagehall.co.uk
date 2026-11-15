@@ -12,9 +12,9 @@ export const site: SiteSettings = {
 	phoneHref: "tel:+441245364193",
 	email: "leighsvillagehall@gmail.com",
 	bookingSecretary: "Stuart Wilson",
-	bookingUrl: "https://hallbookingonline.com/leighsvillagehall/",
-	bookingGuideUrl: "https://hallbookingonline.com/leighsvillagehall/guide.php",
-	bookingDocsUrl: "https://www.hallbookingonline.com/leighsvillagehall/documentation.php",
+	bookingUrl: "/bookings",
+	bookingGuideUrl: "/bookings",
+	bookingDocsUrl: "/bookings",
 	mapEmbedUrl:
 		"https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2465.9322268250976!2d0.507404918041295!3d51.82566850776802!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8ee46b6876f7f%3A0x20a2530dd6c87385!2sLeighs%20Village%20Hall!5e0!3m2!1sen!2suk!4v1631872682896!5m2!1sen!2suk",
 	mapDirectionsUrl: "https://maps.google.com/maps?daddr=51.825812,0.507111",
@@ -127,8 +127,8 @@ export const faqs: FaqItem[] = [
 		question: "How do I book the village hall?",
 		answerHtml: `<p>There are currently two options:</p>
 <ol>
-<li>You may use the <a href="https://hallbookingonline.com/leighsvillagehall/guide.php">online booking form</a> to provisionally book a slot subject to availability. The system will notify the booking secretary, who will then confirm the date and time. You will be sent a link to complete the <a href="/hire-agreement">hire agreement</a> online, using the booking number from that email.</li>
-<li>Contact Stuart Wilson (booking secretary) on <a href="tel:+441245364193">01245 364193</a>. A hire agreement form will be emailed or posted with a copy of the conditions of hire.</li>
+<li>Use the <a href="/bookings">online booking form</a> to request a date. The booking secretary will review it and, if the date can be confirmed, email a link to complete the <a href="/hire-agreement">hire agreement</a>. To review past and upcoming bookings, <a href="/bookings/access">enter the email used on the booking</a>.</li>
+<li>Contact Stuart Wilson (booking secretary) on <a href="tel:+441245364193">01245 364193</a>.</li>
 </ol>`,
 	},
 	{
@@ -157,12 +157,12 @@ export const faqs: FaqItem[] = [
 	{
 		question: "Where can I view the hall’s Conditions of Hire?",
 		answerHtml:
-			'<p>See the <a href="https://www.hallbookingonline.com/leighsvillagehall/documentation.php">documents section of the hall booking website</a>, or download the <a href="/documents/LVH-Conditions-of-Hire.pdf">Conditions of Hire (PDF)</a>.</p>',
+			'<p>Download the <a href="/documents/LVH-Conditions-of-Hire.pdf">Conditions of Hire (PDF)</a> from the bookings page.</p>',
 	},
 	{
 		question: "Where can I find hall dimensions, charges and other key information?",
 		answerHtml:
-			'<p>Hall dimensions are listed on the <a href="/facilities">facilities page</a>. Charges and other hire documents are in the <a href="https://www.hallbookingonline.com/leighsvillagehall/documentation.php">documents section of the hall booking website</a>.</p>',
+			'<p>Hall dimensions are listed on the <a href="/facilities">facilities page</a>. Hire documents are on the <a href="/bookings">bookings page</a>.</p>',
 	},
 ];
 

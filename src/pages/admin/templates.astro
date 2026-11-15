@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Email templates" description="Edit booking email templates." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1>Email templates</h1>
+    <p>Use placeholders such as {'{{hirerName}}'}, {'{{bookingNumber}}'}, {'{{when}}'}, {'{{halls}}'}, {'{{event}}'}, {'{{formUrl}}'}, {'{{adminUrl}}'} and {'{{accessUrl}}'}.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap" data-admin-templates>
+      <AdminNav />
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <div data-admin-template-list></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-templates';
+</script>

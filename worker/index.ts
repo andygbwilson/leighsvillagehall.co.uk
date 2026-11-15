@@ -3,20 +3,17 @@ import {
   applyBookingPrefill,
   assertCanSendInvite,
   buildHireInvite,
+  buildStaffBookingNotice,
+  hireAdminAgreementUrl,
   hireAgreementUrl,
   parseHboBookingEmail,
   parseInviteAllowlist,
   senderLooksLikeHbo,
 } from '../src/lib/booking-email';
-import {
-  ADMIN_HOME,
-  clearAdminCookie,
-  createAdminCookie,
-  isAdminCookieValid,
-  isAdminLoginPath,
-  passwordsMatch,
-  safeAdminNext,
-} from '../src/lib/hire-admin';
+import { ADMIN_HOME, isAdminLoginPath, readAdminSession, safeAdminNext } from '../src/lib/admin-auth';
+import { handleBookingApi, type BookingApiContext } from '../src/lib/booking-api';
+import { applyEmailTemplate, bookingTemplateVars } from '../src/lib/bookings';
+import { createBookingStore } from '../src/lib/booking-store';
 import {
   agreementKvMetadata,
   agreementSummary,
@@ -24,6 +21,7 @@ import {
   isValidBookingNumber,
   mergeAgreement,
   normaliseHireAgreement,
+  omitPublicLockedFields,
   parsePayload,
   sortAgreementSummaries,
   validateAgreement,
@@ -50,7 +48,10 @@ export interface Env {
   BOOKINGS_FORWARD_TO: string;
   BOOKING_SENDER_DOMAIN: string;
   HIRE_INVITE_ALLOWLIST: string;
+  HIRE_ADMIN_EMAIL?: string;
+  HIRE_ADMIN_EXTRA?: string;
   HIRE_ADMIN_PASSWORD: string;
+  TURNSTILE_SECRET_KEY?: string;
 }
 
 type IncomingEmail = {
@@ -66,9 +67,21 @@ const jsonHeaders = {
   'cache-control': 'no-store',
 };
 
+const BOOKING_SYSTEM_KEY = 'sys:booking-system';
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith('/api/')) {
+      try {
+        const bookingResponse = await handleBookingApi(request, url, bookingContext(request, env, url));
+        if (bookingResponse) return bookingResponse;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'The request could not be completed.';
+        return Response.json({ error: message }, { status: 400, headers: jsonHeaders });
+      }
+    }
 
     if (url.pathname.startsWith('/api/admin')) {
       try {
@@ -150,7 +163,7 @@ async function handleHireAgreement(request: Request, env: Env, url: URL): Promis
   }
 
   if (request.method === 'POST') {
-    const payload = parsePayload(await request.json());
+    const payload = omitPublicLockedFields(parsePayload(await request.json()));
     const existing = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(
       bookingStorageKey(payload.bookingNumber),
       'json',
@@ -161,6 +174,12 @@ async function handleHireAgreement(request: Request, env: Env, url: URL): Promis
       return Response.json({ error: errors[0], errors }, { status: 400, headers: jsonHeaders });
     }
     await putAgreement(env, record);
+    const bookingId = Number(record.bookingNumber);
+    if (Number.isFinite(bookingId)) {
+      const store = bookingStore(env);
+      const event = await store.getEvent(bookingId);
+      if (event) await store.updateEvent(bookingId, { status: 'agreed' });
+    }
     return Response.json({ ok: true, record }, { headers: jsonHeaders });
   }
 
@@ -168,37 +187,6 @@ async function handleHireAgreement(request: Request, env: Env, url: URL): Promis
 }
 
 async function handleAdminApi(request: Request, env: Env, url: URL): Promise<Response> {
-  const secure = url.protocol === 'https:';
-
-  if (url.pathname === '/api/admin/login' && request.method === 'POST') {
-    if (!env.HIRE_ADMIN_PASSWORD) {
-      return Response.json(
-        { error: 'Admin access is not configured.' },
-        { status: 503, headers: jsonHeaders },
-      );
-    }
-    const body = (await request.json()) as { password?: string };
-    if (!passwordsMatch(String(body.password ?? ''), env.HIRE_ADMIN_PASSWORD)) {
-      return Response.json({ error: 'That password is not correct.' }, { status: 401, headers: jsonHeaders });
-    }
-    return Response.json(
-      { ok: true },
-      {
-        headers: {
-          ...jsonHeaders,
-          'set-cookie': await createAdminCookie(env.HIRE_ADMIN_PASSWORD, secure),
-        },
-      },
-    );
-  }
-
-  if (url.pathname === '/api/admin/logout' && request.method === 'POST') {
-    return Response.json(
-      { ok: true },
-      { headers: { ...jsonHeaders, 'set-cookie': clearAdminCookie(secure) } },
-    );
-  }
-
   if (!(await isSignedIn(request, env))) {
     return Response.json({ error: 'Please sign in.' }, { status: 401, headers: jsonHeaders });
   }
@@ -304,23 +292,78 @@ async function handleBookingEmail(message: IncomingEmail, env: Env): Promise<voi
     return;
   }
 
+  const isNew = !existing;
   const record = applyBookingPrefill(existing, booking);
   await putAgreement(env, record);
   console.log('Stored provisional booking for admin review', {
     bookingNumber: booking.bookingNumber,
     email: booking.email || '(missing)',
   });
+  if (isNew) {
+    try {
+      await sendStaffBookingNotice(env, record);
+    } catch (error) {
+      console.error('Failed to send staff booking notice', {
+        bookingNumber: record.bookingNumber,
+        error,
+      });
+    }
+  }
+}
+
+async function sendStaffBookingNotice(env: Env, record: HireAgreementRecord): Promise<void> {
+  const to = env.BOOKINGS_FORWARD_TO?.trim();
+  if (!to || !env.EMAIL) return;
+  const adminUrl = hireAdminAgreementUrl(env.SITE_ORIGIN, record.bookingNumber);
+  const notice = buildStaffBookingNotice(record, adminUrl);
+  await env.EMAIL.send({
+    from: { email: env.BOOKINGS_FROM, name: env.BOOKINGS_FROM_NAME || 'Leighs Village Hall' },
+    to: { email: to },
+    replyTo: env.BOOKINGS_FROM,
+    subject: notice.subject,
+    text: notice.text,
+    html: notice.html,
+  });
 }
 
 async function sendStoredHireInvite(env: Env, existing: HireAgreementRecord): Promise<HireAgreementRecord> {
   const record = normaliseHireAgreement(existing);
+  const store = bookingStore(env);
+  const bookingId = Number(record.bookingNumber);
+  const event = Number.isFinite(bookingId) ? await store.getEvent(bookingId) : null;
+  if (event?.isRecurring && !event.recurringConfirmed) {
+    throw new Error(
+      'Confirm that this recurring booking is possible on the booking request page before sending the hire agreement.',
+    );
+  }
   const email = assertCanSendInvite(record, parseInviteAllowlist(env.HIRE_INVITE_ALLOWLIST));
   if (!env.EMAIL) {
     throw new Error('Email sending is not configured.');
   }
 
   const formUrl = hireAgreementUrl(env.SITE_ORIGIN, record.bookingNumber);
-  const invite = buildHireInvite(record, formUrl);
+  let invite = buildHireInvite(record, formUrl);
+  try {
+    const template = await store.getTemplate('hire_invite');
+    invite = applyEmailTemplate(
+      template,
+      event
+        ? bookingTemplateVars(event, { formUrl, adminUrl: '' })
+        : {
+            bookingNumber: record.bookingNumber,
+            hirerName: record.hirerName || 'there',
+            email: record.email,
+            when: [record.hireDate, record.timeFrom, record.timeTo].filter(Boolean).join(', '),
+            halls: '',
+            event: record.functionType || 'your event',
+            recurring: 'No',
+            formUrl,
+            adminUrl: '',
+          },
+    );
+  } catch {
+    // Keep the built-in invite copy if a template has not been stored yet.
+  }
   await env.EMAIL.send({
     from: { email: env.BOOKINGS_FROM, name: env.BOOKINGS_FROM_NAME || 'Leighs Village Hall' },
     to: { email, name: record.hirerName || undefined },
@@ -336,6 +379,7 @@ async function sendStoredHireInvite(env: Env, existing: HireAgreementRecord): Pr
     updatedAt: new Date().toISOString(),
   };
   await putAgreement(env, next);
+  if (event) await store.updateEvent(bookingId, { status: 'invite_sent' });
   console.log('Sent hire agreement invite', { bookingNumber: record.bookingNumber, to: email });
   return next;
 }
@@ -376,7 +420,54 @@ async function listAgreements(env: Env): Promise<HireAgreementSummary[]> {
 }
 
 async function isSignedIn(request: Request, env: Env): Promise<boolean> {
-  return isAdminCookieValid(request.headers.get('cookie'), env.HIRE_ADMIN_PASSWORD ?? '');
+  return Boolean(await readAdminSession(request.headers.get('cookie'), env.HIRE_ADMIN_PASSWORD ?? ''));
+}
+
+function bookingStore(env: Env) {
+  return createBookingStore({
+    async load() {
+      return env.HIRE_AGREEMENTS.get(BOOKING_SYSTEM_KEY, 'json');
+    },
+    async save(state) {
+      await env.HIRE_AGREEMENTS.put(BOOKING_SYSTEM_KEY, JSON.stringify(state));
+    },
+  });
+}
+
+function bookingContext(request: Request, env: Env, url: URL): BookingApiContext {
+  const store = bookingStore(env);
+  return {
+    store,
+    origin: url.origin,
+    siteOrigin: env.SITE_ORIGIN || url.origin,
+    adminSecret: env.HIRE_ADMIN_PASSWORD ?? '',
+    bootstrapPassword: env.HIRE_ADMIN_PASSWORD ?? '',
+    bootstrapAdminEmail: env.HIRE_ADMIN_EMAIL ?? '',
+    bootstrapAdminExtras: env.HIRE_ADMIN_EXTRA ?? '',
+    bookingsForwardTo: env.BOOKINGS_FORWARD_TO ?? '',
+    inviteAllowlist: parseInviteAllowlist(env.HIRE_INVITE_ALLOWLIST),
+    secure: url.protocol === 'https:',
+    turnstileSecret: env.TURNSTILE_SECRET_KEY ?? '',
+    getAgreement: (bookingNumber) => env.HIRE_AGREEMENTS.get<HireAgreementRecord>(bookingStorageKey(bookingNumber), 'json'),
+    putAgreement: (record) => putAgreement(env, record),
+    assertCanSendInvite: (record) => assertCanSendInvite(record, parseInviteAllowlist(env.HIRE_INVITE_ALLOWLIST)),
+    sendHireInvite: async (record) => ({ record: await sendStoredHireInvite(env, record), delivered: true }),
+    mailer: env.EMAIL
+      ? {
+          async send(message) {
+            await env.EMAIL.send({
+              from: { email: env.BOOKINGS_FROM, name: env.BOOKINGS_FROM_NAME || 'Leighs Village Hall' },
+              to: { email: message.to, name: message.name },
+              replyTo: env.BOOKINGS_FROM,
+              subject: message.subject,
+              text: message.text,
+              html: message.html,
+            });
+            return { delivered: true };
+          },
+        }
+      : undefined,
+  };
 }
 
 function htmlToText(html: string): string {

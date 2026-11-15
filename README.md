@@ -2,7 +2,7 @@
 
 Astro frontend for [leighsvillagehall.co.uk](https://www.leighsvillagehall.co.uk), ready to deploy as a **static site on the Cloudflare Workers free tier**, with **Sanity** as the CMS.
 
-The live WordPress site on AWS has been migrated: pages, news, FAQs, club contacts, hire PDFs, photos and floor plan. Hall hire stays on [Hall Booking Online](https://hallbookingonline.com/leighsvillagehall/) — that system is not replaced.
+The live WordPress site on AWS has been migrated: pages, news, FAQs, club contacts, hire PDFs, photos and floor plan. Hall hire is handled on this site: public requests at `/bookings`, then a hire agreement after the booking secretary reviews the date.
 
 ## Local development
 
@@ -78,9 +78,37 @@ In the Cloudflare dashboard you can then:
 
 Until DNS is switched, test on the `*.workers.dev` URL Wrangler prints.
 
+## Staging
+
+Staging is a separate Worker (`leighs-village-hall-staging`) with its own hire-agreement KV store. It is built with noindex and `SITE_ORIGIN` set to `https://staging.leighsvillagehall.co.uk`.
+
+```sh
+npx wrangler secret put HIRE_ADMIN_PASSWORD --env staging
+npm run deploy:staging
+```
+
+Then in the Cloudflare dashboard, add the custom domain `staging.leighsvillagehall.co.uk` to the **leighs-village-hall-staging** Worker. Do not point Hall Booking Online or Email Routing at staging; production keeps those.
+
+## Bookings
+
+The public `/bookings` page is the calendar and enquiry form. Requests notify the booking secretary, who reviews them at `/admin/bookings` and sends a hire-agreement invite when the date can be confirmed.
+
+Hirers can review past and upcoming bookings without an account: `/bookings/access` asks for the email used on the booking and emails a 24-hour link to `/bookings/mine`. The same message is returned whether or not that email is on file. Local `npm run dev` logs the access email instead of sending it.
+
+The enquiry form is protected with [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/). Local `npm run dev` uses Cloudflare’s always-pass dummy keys. For production, create a widget in the Cloudflare dashboard, set `PUBLIC_TURNSTILE_SITE_KEY` for the build, and store the secret with:
+
+```sh
+npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put TURNSTILE_SECRET_KEY --env staging
+```
+
+Recurring requests (weekly or monthly) stay as a single date until the secretary confirms they are possible. Club series for next year can be placed on the admin calendar before the public period is opened in **Booking period**.
+
+Admin logins are per person. The first sign-in with `HIRE_ADMIN_PASSWORD` and `leighsvillagehall@gmail.com` (`HIRE_ADMIN_EMAIL`) creates the booking secretary account. `HIRE_ADMIN_EXTRA` (currently `andygbwilson@gmail.com`) can sign in with the same password to create a full-access admin account. Further accounts (including accounting) are added under **Accounts**. Email copy is edited under **Email templates**.
+
 ## Hire agreement emails
 
-Provisional bookings still start on Hall Booking Online. When HBO emails `bookings@leighsvillagehall.co.uk`, Cloudflare Email Routing sends that message to this Worker. The Worker stores a draft hire agreement against the booking ID. Admins review it at `/admin/agreement?booking=15441` and send the hire-agreement invite from that page. The original HBO message is forwarded to `leighsvillagehall@gmail.com`.
+Public booking requests now start on `/bookings`. Hall Booking Online email ingest remains as a fallback: when HBO emails `bookings@leighsvillagehall.co.uk`, Cloudflare Email Routing sends that message to this Worker. The Worker stores a draft hire agreement against the booking ID and emails `leighsvillagehall@gmail.com` a link to `/admin/agreement?booking=15441`. Admins review it there, add the deposit due, and send the hire-agreement invite. The original HBO message is also forwarded to that Gmail address.
 
 This needs **Workers Paid** (to send mail to hirers) and Email Service set up on the domain:
 

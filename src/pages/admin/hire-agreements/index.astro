@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import AdminNav from '../../../components/AdminNav.astro';
 ---
 
 <BaseLayout title="Hire agreements" description="Review hire agreements submitted for Leighs Village Hall." noindex>
@@ -11,13 +12,14 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 
   <section class="section section-paper">
     <div class="wrap" data-admin-list>
+      <AdminNav>
       <div class="admin-toolbar">
         <label class="ha-field admin-search">
           <span>Search</span>
           <input type="search" data-admin-search placeholder="Name, email or booking number" />
         </label>
-        <button class="button button-secondary" type="button" data-admin-logout>Sign out</button>
       </div>
+      </AdminNav>
       <p class="ha-banner is-error" data-admin-error hidden></p>
       <div class="admin-table-wrap">
         <table class="admin-table">

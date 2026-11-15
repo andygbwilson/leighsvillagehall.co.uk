@@ -20,7 +20,7 @@ const site = await getSite();
 		<div class="wrap ha">
 			<form class="ha-gate card" data-hire-gate>
 				<h2>Your booking number</h2>
-				<p>This is the booking number from the hire agreement email.</p>
+				<p>This is the booking number from the hire agreement email. To see all of your past and upcoming bookings, <a href="/bookings/access">request a one-time link</a>.</p>
 				<label class="ha-field">
 					<span>Booking number</span>
 					<input name="bookingNumber" type="text" autocomplete="off" maxlength="40" required />
@@ -108,15 +108,15 @@ const site = await getSite();
 					<div class="ha-grid">
 						<label class="ha-field">
 							<span>Date</span>
-							<input name="hireDate" type="date" required />
+							<input name="hireDate" type="date" required readonly tabindex="-1" />
 						</label>
 						<label class="ha-field">
 							<span>Time from</span>
-							<input name="timeFrom" type="time" required />
+							<input name="timeFrom" type="time" required readonly tabindex="-1" />
 						</label>
 						<label class="ha-field">
 							<span>Time to</span>
-							<input name="timeTo" type="time" required />
+							<input name="timeTo" type="time" required readonly tabindex="-1" />
 						</label>
 					</div>
 				</fieldset>
@@ -143,8 +143,25 @@ const site = await getSite();
 				</fieldset>
 
 				<fieldset class="card">
+					<legend>5. Hiring charge</legend>
+					<p class="ha-note">These amounts are set by the booking secretary.</p>
+					<div class="ha-grid">
+						<label class="ha-field">
+							<span>Deposit due</span>
+							<p class="ha-note my-0">The deposit due before your booking can be confirmed.</p>
+							<input name="depositDue" type="text" readonly tabindex="-1" />
+						</label>
+						<label class="ha-field">
+							<span>Balance due</span>
+							<p class="ha-note my-0">The balance due for your booking to be paid at least 7 days before the event.</p>
+							<input name="balanceDue" type="text" readonly tabindex="-1" />
+						</label>
+					</div>
+				</fieldset>
+
+				<fieldset class="card">
 					<legend>6. Facilities and use</legend>
-					<p class="ha-note">
+					<p>
 						Please tell us about chairs, tables, children’s furniture, crockery and whether the stage needs to be cleared before the
 						event.
 					</p>

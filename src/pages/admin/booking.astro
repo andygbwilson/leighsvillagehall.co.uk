@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Booking" description="Review a booking request." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1 data-admin-heading>Booking</h1>
+    <p>Check the request, set the deposit on the hire agreement, confirm a recurring series if needed, then send the invite.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap" data-admin-booking>
+      <AdminNav>
+      <div class="admin-toolbar">
+        <a class="button button-secondary" href="/admin/bookings">All requests</a>
+        <a class="button button-secondary" data-admin-agreement href="/admin/agreement">Hire agreement</a>
+        <button class="button button-primary" type="button" data-admin-invite>Send invite</button>
+        <button class="button button-secondary" type="button" data-admin-decline>Decline</button>
+        <button class="button button-secondary" type="button" data-admin-duplicate>Copy into next year</button>
+      </div>
+      </AdminNav>
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <label class="ha-check" data-recurring-confirm hidden>
+        <input type="checkbox" data-confirm-recurring />
+        <span>Confirm this recurring booking is possible. Later dates will be held on the calendar.</span>
+      </label>
+      <div data-admin-view></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-booking-detail';
+</script>

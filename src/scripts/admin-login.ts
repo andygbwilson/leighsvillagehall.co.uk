@@ -1,4 +1,4 @@
-import { ADMIN_HOME, safeAdminNext } from '../lib/hire-admin';
+import { ADMIN_HOME, safeAdminNext } from '../lib/admin-auth';
 
 function initAdminLogin() {
   const form = document.querySelector<HTMLFormElement>('[data-admin-login]');
@@ -8,12 +8,13 @@ function initAdminLogin() {
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     error.hidden = true;
+    const email = String(new FormData(form).get('email') ?? '');
     const password = String(new FormData(form).get('password') ?? '');
     void fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       credentials: 'same-origin',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ email, password }),
     })
       .then(async (response) => {
         const result = (await response.json()) as { error?: string };

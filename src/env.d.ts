@@ -1,9 +1,19 @@
 /// <reference types="astro/client" />
+/// <reference types="vite/client" />
 /// <reference types="astro/astro-jsx" />
 
 interface ImportMetaEnv {
+  readonly DEV: boolean;
+  readonly PROD: boolean;
+  readonly MODE: string;
+  readonly SSR: boolean;
+  readonly BASE_URL: string;
+  readonly SITE?: string;
   readonly PUBLIC_SANITY_PROJECT_ID?: string;
   readonly PUBLIC_SANITY_DATASET?: string;
+  readonly PUBLIC_SITE_ORIGIN?: string;
+  readonly PUBLIC_NOINDEX?: string;
+  readonly PUBLIC_TURNSTILE_SITE_KEY?: string;
 }
 
 interface ImportMeta {

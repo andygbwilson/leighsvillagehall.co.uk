@@ -1,0 +1,35 @@
+---
+const path = Astro.url.pathname;
+const items = [
+  { href: '/admin/bookings', label: 'Requests' },
+  { href: '/admin/calendar', label: 'Calendar' },
+  { href: '/bookings', label: 'Public calendar' },
+  { href: '/admin/hire-agreements', label: 'Agreements' },
+  { href: '/admin/templates', label: 'Email templates' },
+  { href: '/admin/accounts', label: 'Accounts' },
+  { href: '/admin/rooms', label: 'Rooms' },
+  { href: '/admin/settings', label: 'Settings' },
+];
+
+const isCurrent = (href: string) => path === href || (href !== '/bookings' && path.startsWith(`${href}/`));
+---
+
+<div class="admin-panel">
+  <div class="admin-nav-row">
+    <nav class="admin-nav" aria-label="Admin">
+      {
+        items.map((item) => (
+          <a
+            class:list={['button', 'button-sm', isCurrent(item.href) ? 'button-primary' : 'button-secondary']}
+            href={item.href}
+            aria-current={isCurrent(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+    <button class="button button-sm button-secondary admin-nav-logout" type="button" data-admin-logout>Sign out</button>
+  </div>
+  <slot />
+</div>

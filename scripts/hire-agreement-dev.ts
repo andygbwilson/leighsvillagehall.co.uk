@@ -5,22 +5,24 @@ import {
   applyBookingPrefill,
   assertCanSendInvite,
   buildHireInvite,
+  buildStaffBookingNotice,
+  hireAdminAgreementUrl,
   hireAgreementUrl,
   parseHboBookingEmail,
   parseInviteAllowlist,
 } from '../src/lib/booking-email';
-import {
-  clearAdminCookie,
-  createAdminCookie,
-  isAdminCookieValid,
-  passwordsMatch,
-  summariesFromRecords,
-} from '../src/lib/hire-admin';
+import { handleBookingApi } from '../src/lib/booking-api';
+import { DEV_TURNSTILE_SECRET } from '../src/lib/turnstile';
+import { applyEmailTemplate, bookingTemplateVars } from '../src/lib/bookings';
+import { createBookingStore } from '../src/lib/booking-store';
+import { summariesFromRecords } from '../src/lib/hire-admin';
+import { readAdminSession } from '../src/lib/admin-auth';
 import {
   bookingStorageKey,
   isValidBookingNumber,
   mergeAgreement,
   normaliseHireAgreement,
+  omitPublicLockedFields,
   parsePayload,
   sortAgreementSummaries,
   validateAgreement,
@@ -28,6 +30,7 @@ import {
 } from '../src/lib/hire-agreement';
 
 const storePath = path.join(process.cwd(), '.data', 'hire-agreements.json');
+const bookingSystemPath = path.join(process.cwd(), '.data', 'booking-system.json');
 const jsonHeaders = {
   'content-type': 'application/json; charset=utf-8',
   'cache-control': 'no-store',
@@ -59,7 +62,7 @@ export async function loadHireAgreement(bookingNumber: string): Promise<HireAgre
 }
 
 export async function saveHireAgreement(body: unknown): Promise<HireAgreementRecord> {
-  const payload = parsePayload(body);
+  const payload = omitPublicLockedFields(parsePayload(body));
   const store = await readStore();
   const key = bookingStorageKey(payload.bookingNumber);
   const record = mergeAgreement(store[key] ?? null, payload);
@@ -69,6 +72,12 @@ export async function saveHireAgreement(body: unknown): Promise<HireAgreementRec
   }
   store[key] = record;
   await writeStore(store);
+  const bookingId = Number(record.bookingNumber);
+  if (Number.isFinite(bookingId)) {
+    const bookings = localBookingStore();
+    const event = await bookings.getEvent(bookingId);
+    if (event) await bookings.updateEvent(bookingId, { status: 'agreed' });
+  }
   return record;
 }
 
@@ -79,9 +88,22 @@ export async function ingestHboBookingEmail(text: string): Promise<HireAgreement
   }
   const store = await readStore();
   const key = bookingStorageKey(booking.bookingNumber);
+  const isNew = !store[key];
   const record = applyBookingPrefill(store[key] ?? null, booking);
   store[key] = record;
   await writeStore(store);
+  if (isNew) {
+    const origin = process.env.SITE_ORIGIN || 'http://localhost:4321';
+    const to = process.env.BOOKINGS_FORWARD_TO || 'leighsvillagehall@gmail.com';
+    const adminUrl = hireAdminAgreementUrl(origin, record.bookingNumber);
+    const notice = buildStaffBookingNotice(record, adminUrl);
+    console.log('Staff booking notice (not delivered in local dev)', {
+      to,
+      subject: notice.subject,
+      adminUrl,
+      text: notice.text,
+    });
+  }
   return record;
 }
 
@@ -97,9 +119,38 @@ export async function sendHireInvite(
   }
 
   const record = normaliseHireAgreement(existing);
+  const bookings = localBookingStore();
+  const bookingId = Number(record.bookingNumber);
+  const event = Number.isFinite(bookingId) ? await bookings.getEvent(bookingId) : null;
+  if (event?.isRecurring && !event.recurringConfirmed) {
+    throw new Error(
+      'Confirm that this recurring booking is possible on the booking request page before sending the hire agreement.',
+    );
+  }
   const email = assertCanSendInvite(record, parseInviteAllowlist(process.env.HIRE_INVITE_ALLOWLIST));
   const formUrl = hireAgreementUrl(origin, record.bookingNumber);
-  const invite = buildHireInvite(record, formUrl);
+  let invite = buildHireInvite(record, formUrl);
+  try {
+    const template = await bookings.getTemplate('hire_invite');
+    invite = applyEmailTemplate(
+      template,
+      event
+        ? bookingTemplateVars(event, { formUrl, adminUrl: '' })
+        : {
+            bookingNumber: record.bookingNumber,
+            hirerName: record.hirerName || 'there',
+            email: record.email,
+            when: [record.hireDate, record.timeFrom, record.timeTo].filter(Boolean).join(', '),
+            halls: '',
+            event: record.functionType || 'your event',
+            recurring: 'No',
+            formUrl,
+            adminUrl: '',
+          },
+    );
+  } catch {
+    // Keep the built-in invite copy if a template has not been stored yet.
+  }
   console.log('Hire agreement invite (not delivered in local dev)', {
     to: email,
     subject: invite.subject,
@@ -114,7 +165,91 @@ export async function sendHireInvite(
   };
   store[key] = next;
   await writeStore(store);
+  if (event) await bookings.updateEvent(bookingId, { status: 'invite_sent' });
   return { record: next, delivered: false };
+}
+
+function localBookingStore() {
+  return createBookingStore({
+    async load() {
+      try {
+        return JSON.parse(await readFile(bookingSystemPath, 'utf8'));
+      } catch {
+        return null;
+      }
+    },
+    async save(state) {
+      await mkdir(path.dirname(bookingSystemPath), { recursive: true });
+      await writeFile(bookingSystemPath, JSON.stringify(state, null, 2));
+    },
+  });
+}
+
+async function nodeRequest(req: IncomingMessage, url: URL): Promise<Request> {
+  const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
+  const body = hasBody ? JSON.stringify((await readJson(req)) ?? {}) : undefined;
+  const headers = new Headers();
+  if (req.headers.cookie) headers.set('cookie', req.headers.cookie);
+  headers.set('content-type', 'application/json');
+  return new Request(url.toString(), { method: req.method, headers, body });
+}
+
+function writeResponse(res: ServerResponse, response: Response, body: string) {
+  res.statusCode = response.status;
+  response.headers.forEach((value, name) => res.setHeader(name, value));
+  res.end(body);
+}
+
+export async function handleDevBookingApi(
+  req: IncomingMessage,
+  res: ServerResponse,
+  url: URL,
+): Promise<boolean> {
+  if (url.pathname.startsWith('/api/admin/hire-agreements')) return false;
+  if (!url.pathname.startsWith('/api/admin') && !url.pathname.startsWith('/api/bookings')) return false;
+  const request = await nodeRequest(req, url);
+  const origin = req.headers.host ? `http://${req.headers.host}` : 'http://localhost:4321';
+  const bookings = localBookingStore();
+  let response: Response | null;
+  try {
+    response = await handleBookingApi(request, url, {
+    store: bookings,
+    origin,
+    siteOrigin: origin,
+    adminSecret: adminPassword(),
+    bootstrapPassword: adminPassword(),
+    bootstrapAdminEmail: process.env.HIRE_ADMIN_EMAIL || 'leighsvillagehall@gmail.com',
+    bootstrapAdminExtras: process.env.HIRE_ADMIN_EXTRA || 'andygbwilson@gmail.com',
+    bookingsForwardTo: process.env.BOOKINGS_FORWARD_TO || 'leighsvillagehall@gmail.com',
+    inviteAllowlist: parseInviteAllowlist(process.env.HIRE_INVITE_ALLOWLIST),
+    secure: false,
+    turnstileSecret: process.env.TURNSTILE_SECRET_KEY || DEV_TURNSTILE_SECRET,
+    getAgreement: (bookingNumber) => loadHireAgreement(bookingNumber),
+    putAgreement: async (record) => {
+      const store = await readStore();
+      store[bookingStorageKey(record.bookingNumber)] = record;
+      await writeStore(store);
+    },
+    assertCanSendInvite: (record) => assertCanSendInvite(record, parseInviteAllowlist(process.env.HIRE_INVITE_ALLOWLIST)),
+    sendHireInvite: (record) => sendHireInvite(record.bookingNumber, origin),
+    mailer: {
+      async send(message) {
+        console.log('Booking email (not delivered in local dev)', message);
+        return { delivered: false };
+      },
+    },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'The request could not be completed.';
+    res.statusCode = 400;
+    res.setHeader('content-type', jsonHeaders['content-type']);
+    res.setHeader('cache-control', jsonHeaders['cache-control']);
+    res.end(JSON.stringify({ error: message }));
+    return true;
+  }
+  if (!response) return false;
+  writeResponse(res, response, await response.text());
+  return true;
 }
 
 export async function handleAdminDevApi(
@@ -123,6 +258,7 @@ export async function handleAdminDevApi(
   url: URL,
 ): Promise<boolean> {
   if (!url.pathname.startsWith('/api/admin')) return false;
+  if (await handleDevBookingApi(req, res, url)) return true;
 
   const send = (status: number, body: unknown, extra: Record<string, string> = {}) => {
     res.statusCode = status;
@@ -133,22 +269,7 @@ export async function handleAdminDevApi(
   };
 
   try {
-    if (url.pathname === '/api/admin/login' && req.method === 'POST') {
-      const body = await readJson(req) as { password?: string };
-      if (!passwordsMatch(String(body.password ?? ''), adminPassword())) {
-        send(401, { error: 'That password is not correct.' });
-        return true;
-      }
-      send(200, { ok: true }, { 'set-cookie': await createAdminCookie(adminPassword(), false) });
-      return true;
-    }
-
-    if (url.pathname === '/api/admin/logout' && req.method === 'POST') {
-      send(200, { ok: true }, { 'set-cookie': clearAdminCookie(false) });
-      return true;
-    }
-
-    if (!(await isAdminCookieValid(req.headers.cookie, adminPassword()))) {
+    if (!(await readAdminSession(req.headers.cookie, adminPassword()))) {
       send(401, { error: 'Please sign in.' });
       return true;
     }
@@ -193,7 +314,11 @@ export async function handleAdminDevApi(
       }
 
       if (req.method === 'PUT') {
-        const payload = parsePayload({ ...(await readJson(req)), bookingNumber });
+        const body = await readJson(req);
+        const payload = parsePayload({
+          ...(body && typeof body === 'object' ? body : {}),
+          bookingNumber,
+        });
         const record = mergeAgreement(existing, payload, { markSubmitted: false });
         if (record.status === 'submitted') {
           const errors = validateAgreement(record);

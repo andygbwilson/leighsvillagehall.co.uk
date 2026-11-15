@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Booking requests" description="Review booking requests for Leighs Village Hall." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1>Booking requests</h1>
+    <p>Review new requests, then send a hire agreement when the date can be confirmed.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap" data-admin-bookings>
+      <AdminNav>
+      <div class="admin-toolbar">
+        <label class="ha-field admin-search">
+          <span>Search</span>
+          <input type="search" data-admin-search placeholder="Name, email or booking number" />
+        </label>
+      </div>
+      </AdminNav>
+      <p class="ha-banner is-error" data-admin-error hidden></p>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Hirer</th>
+              <th>Halls</th>
+              <th>Recurring</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody data-admin-rows>
+            <tr><td colspan="6">Loading requests…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-bookings';
+</script>

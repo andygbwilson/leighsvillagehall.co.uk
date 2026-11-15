@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+---
+
+<BaseLayout title="Review your bookings" description="Enter the email used on your Leighs Village Hall booking to receive a one-time link.">
+	<section class="page-hero wrap">
+		<p class="kicker">Hire the hall</p>
+		<h1>Review your bookings</h1>
+		<p>
+			Enter the email address used on the booking. We will email a one-time link to your past and upcoming bookings. The link works for 24
+			hours.
+		</p>
+	</section>
+
+	<section class="section section-paper">
+		<div class="wrap ha">
+			<form class="ha-gate card" data-booking-access data-turnstile-sitekey={turnstileSiteKey || undefined}>
+				<h2>Your booking email</h2>
+				<p>Use the same address you gave when you requested the booking.</p>
+				<div class="ha-banner is-error" data-booking-access-banner hidden></div>
+				<label class="ha-field">
+					<span>Email</span>
+					<input name="email" type="email" autocomplete="email" required />
+				</label>
+				{turnstileSiteKey ? (
+					<div class="ha-turnstile">
+						<p class="ha-note">Please complete the check before we send the link.</p>
+						<div data-turnstile></div>
+					</div>
+				) : null}
+				<div class="actions">
+					<button class="button button-primary" type="submit">Email me a link</button>
+				</div>
+			</form>
+			<p class="ha-banner" data-booking-access-success hidden></p>
+			<div class="actions">
+				<a class="button button-secondary" href="/bookings">Back to the booking calendar</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<script>
+	import "../../scripts/booking-access";
+</script>

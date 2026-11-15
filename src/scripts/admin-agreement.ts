@@ -133,6 +133,7 @@ function initAdminDetail() {
       tenAcknowledged: data.get('tenAcknowledged') === 'true',
       paymentMethod:
         payment === 'cash' || payment === 'cheque' || payment === 'bank' || payment === 'later' ? payment : '',
+      depositDue: str('depositDue'),
       amountPaid: str('amountPaid'),
       balanceDue: str('balanceDue'),
       publicLiabilityRead: data.get('publicLiabilityRead') === 'true',
@@ -250,7 +251,7 @@ function fieldMarkup(
             ? ' autocomplete="address-level2"'
             : key === 'county'
               ? ' autocomplete="address-level1"'
-              : key === 'amountPaid' || key === 'balanceDue'
+              : key === 'depositDue' || key === 'amountPaid' || key === 'balanceDue'
                 ? ' inputmode="decimal"'
                 : '';
   const fieldClass = key === 'postcode' ? 'ha-field ha-postcode' : 'ha-field';

@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Your bookings" description="Past and upcoming Leighs Village Hall bookings for your email address." noindex>
+	<section class="page-hero wrap">
+		<p class="kicker">Hire the hall</p>
+		<h1>Your bookings</h1>
+		<div class="hirer-toolbar">
+			<p data-hirer-intro>Loading your bookings…</p>
+			<button class="button button-secondary" type="button" data-hirer-logout hidden>Sign out</button>
+		</div>
+	</section>
+
+	<section class="section section-paper">
+		<div class="wrap ha" data-hirer-bookings>
+			<p class="ha-banner is-error" data-hirer-banner hidden></p>
+			<div data-hirer-upcoming></div>
+			<div data-hirer-past></div>
+			<div class="actions">
+				<a class="button button-primary" href="/bookings/access" data-hirer-new-link hidden>Request a new link</a>
+				<a class="button button-secondary" href="/bookings">Back to the booking calendar</a>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
+
+<script>
+	import "../../scripts/booking-mine";
+</script>

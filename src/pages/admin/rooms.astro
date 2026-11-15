@@ -1,0 +1,42 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdminNav from '../../components/AdminNav.astro';
+---
+
+<BaseLayout title="Rooms" description="Manage bookable rooms and colours." noindex>
+  <section class="page-hero wrap">
+    <p class="kicker">Bookings admin</p>
+    <h1>Rooms</h1>
+    <p>John Wright Hall is blue, Brian Poultney Hall is green, and bookings that use more than one space show in grey.</p>
+  </section>
+  <section class="section section-paper">
+    <div class="wrap" data-admin-rooms>
+      <AdminNav />
+      <p class="ha-banner" data-admin-banner hidden></p>
+      <form class="ha-form" data-rooms-form>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Public</th>
+                <th>Short name</th>
+                <th>Full name</th>
+                <th>Colour</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody data-room-rows></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button class="button btn-sm button-secondary" type="button" data-add-room>Add a room</button>
+          <button class="button btn-sm button-primary" type="submit">Save rooms</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import '../../scripts/admin-rooms';
+</script>
