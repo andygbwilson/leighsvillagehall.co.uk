@@ -368,6 +368,9 @@ export type HireAgreementSummary = {
   hireDate: string;
   timeFrom: string;
   timeTo: string;
+  functionType: string;
+  johnWrightHall: string;
+  brianPoultneyHall: string;
   status: HireAgreementRecord['status'];
   updatedAt: string;
   inviteSentAt: string;
@@ -381,6 +384,9 @@ export function agreementSummary(record: HireAgreementRecord): HireAgreementSumm
     hireDate: record.hireDate,
     timeFrom: record.timeFrom,
     timeTo: record.timeTo,
+    functionType: record.functionType,
+    johnWrightHall: record.johnWrightHall,
+    brianPoultneyHall: record.brianPoultneyHall,
     status: record.status,
     updatedAt: record.updatedAt,
     inviteSentAt: record.inviteSentAt ?? '',
@@ -396,6 +402,9 @@ export function agreementKvMetadata(record: HireAgreementRecord): Record<string,
     hireDate: summary.hireDate,
     timeFrom: summary.timeFrom,
     timeTo: summary.timeTo,
+    functionType: summary.functionType,
+    johnWrightHall: summary.johnWrightHall,
+    brianPoultneyHall: summary.brianPoultneyHall,
     status: summary.status,
     updatedAt: summary.updatedAt,
     inviteSentAt: summary.inviteSentAt,

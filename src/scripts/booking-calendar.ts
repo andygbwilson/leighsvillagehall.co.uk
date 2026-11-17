@@ -13,6 +13,10 @@ type CalendarEvent = {
   telephone?: string;
   organisation?: string;
   notes?: string;
+  description?: string;
+  privateEvent?: boolean;
+  calendarPrivacy?: string;
+  eventDescription?: string;
   bookingStatus?: string;
 };
 
@@ -207,13 +211,33 @@ function initCalendar(root: HTMLElement) {
     }
     overviewTitle.textContent = event.title || 'Booking';
     const status = isAdmin && event.bookingStatus ? statusLabel(event.bookingStatus) : event.status === 'provisional' ? 'Provisional' : 'Approved';
+    const extra = isAdmin
+      ? event.eventDescription || event.description || ''
+      : event.privateEvent
+        ? ''
+        : event.description || '';
+    const privacyLabel = event.privateEvent || event.calendarPrivacy === 'private' ? 'Private event' : 'Show event information';
     overviewBody.innerHTML = `
       <dl class="cal-overview-dl">
         <div><dt>Date:</dt><dd>${escapeHtml(formatDayLong(event.date))}</dd></div>
         <div><dt>Time:</dt><dd>${escapeHtml(event.timeFrom)} – ${escapeHtml(event.timeTo)}</dd></div>
         <div><dt>Facilities:</dt><dd>${escapeHtml(facilitiesLabel(event, rooms))}</dd></div>
         <div><dt>Status:</dt><dd>${escapeHtml(status)}</dd></div>
-        <div><dt>Additional information:</dt><dd>${escapeHtml(event.title || '—')}</dd></div>
+        ${
+          isAdmin
+            ? `<div><dt>Public calendar:</dt><dd>${escapeHtml(privacyLabel)}</dd></div>`
+            : ''
+        }
+        ${
+          extra
+            ? `<div><dt>Additional information:</dt><dd>${escapeHtml(extra)}</dd></div>`
+            : ''
+        }
+        ${
+          !isAdmin && !event.privateEvent && event.organisation
+            ? `<div><dt>Organisation:</dt><dd>${escapeHtml(event.organisation)}</dd></div>`
+            : ''
+        }
       </dl>
       ${
         isAdmin
@@ -250,6 +274,9 @@ function initCalendar(root: HTMLElement) {
               telephone?: string;
               organisation?: string;
               notes?: string;
+              eventDescription?: string;
+              calendarPrivacy?: string;
+              functionType?: string;
               status?: string;
             };
           };
@@ -262,6 +289,9 @@ function initCalendar(root: HTMLElement) {
               telephone: result.booking.telephone,
               organisation: result.booking.organisation,
               notes: result.booking.notes,
+              eventDescription: result.booking.eventDescription,
+              calendarPrivacy: result.booking.calendarPrivacy,
+              title: result.booking.functionType || event.title,
               bookingStatus: result.booking.status || event.bookingStatus,
             },
             true,
@@ -368,7 +398,7 @@ function eventChip(event: CalendarEvent, admin: boolean, highlight: boolean): st
   const who = admin && event.hirerName ? ` · ${escapeHtml(event.hirerName)}` : '';
   const inner = `<span class="cal-event-time">${escapeHtml(event.timeFrom)}–${escapeHtml(event.timeTo)}</span><span class="cal-event-title">${escapeHtml(event.title)}${who}</span>`;
   const cls = `cal-event${event.status === 'provisional' && highlight ? ' is-provisional' : ''}${event.rooms.length > 1 ? ' is-multi' : ''}`;
-  return `<button class="${cls}" type="button" data-cal-event="${escapeHtml(eventKey(event))}" style="${chipStyle(event, highlight)}">${inner}</button>`;
+  return `<button class="${cls}" type="button" data-cal-event="${escapeHtml(eventKey(event))}" style="${chipStyle(event)}">${inner}</button>`;
 }
 
 function eventKey(event: CalendarEvent): string {
@@ -397,10 +427,9 @@ function statusLabel(status: string): string {
   return status;
 }
 
-function chipStyle(event: CalendarEvent, highlight: boolean): string {
+function chipStyle(event: CalendarEvent): string {
   const colour = event.rooms.length > 1 ? '#6b7280' : event.colour;
-  const dashed = event.status === 'provisional' && highlight ? 'box-shadow:inset 0 0 0 2px rgb(17 17 17 / 55%);' : '';
-  return `background:${colour};color:${contrastText(colour)};${dashed}`;
+  return `border-left-color:${colour};`;
 }
 
 function contrastText(colour: string): string {

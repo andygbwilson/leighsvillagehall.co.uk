@@ -1,0 +1,58 @@
+---
+type Props = { value?: 'show' | 'private' };
+const { value = 'show' } = Astro.props;
+---
+
+<div class="ha-privacy">
+	<div class="ha-privacy-head">
+		<span>Privacy on public calendar</span>
+		<button class="ha-info" type="button" data-privacy-help aria-haspopup="dialog" aria-controls="calendar-privacy-help">
+			<span class="visually-hidden">Help: public calendar privacy</span>
+			i
+		</button>
+	</div>
+	<div class="ha-choice">
+		<label>
+			<input type="radio" name="calendarPrivacy" value="show" required checked={value === 'show'} />
+			Show event information
+		</label>
+		<label>
+			<input type="radio" name="calendarPrivacy" value="private" required checked={value === 'private'} />
+			Private event
+		</label>
+	</div>
+	<p class="ha-note" data-privacy-hint>
+		Your contact details are never shown on the public calendar.
+	</p>
+</div>
+
+<dialog class="ha-privacy-dialog" id="calendar-privacy-help" data-privacy-dialog>
+	<header>
+		<h3>Public calendar privacy</h3>
+		<button class="cal-overview-x" type="button" data-privacy-close aria-label="Close">×</button>
+	</header>
+	<div class="ha-privacy-dialog-body">
+		<p>You can choose whether information about your event is shown on the public calendar.</p>
+		<h4>Show event information</h4>
+		<p>Your contact details will not be displayed on the public calendar. It will show:</p>
+		<ul>
+			<li>Event title</li>
+			<li>Time and hall</li>
+			<li>Your organisation, if you listed one</li>
+			<li>The event description</li>
+		</ul>
+		<p>
+			If you would like the public to see extra details, such as a contact number, include them in the event
+			description.
+		</p>
+		<h4>Private event</h4>
+		<p>
+				The public calendar will only show the booking time and halls needed. It will be listed as{' '}
+				<strong>Private Event</strong>. Only the booking secretary and administrators can see the event details,
+				including your contact information.
+		</p>
+	</div>
+	<div class="cal-overview-actions">
+		<button class="button button-secondary" type="button" data-privacy-close>Close</button>
+	</div>
+</dialog>

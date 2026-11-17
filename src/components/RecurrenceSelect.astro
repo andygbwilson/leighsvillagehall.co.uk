@@ -1,0 +1,16 @@
+---
+import { RECURRENCE_OPTIONS } from '../lib/bookings';
+
+type Props = { includeBlank?: boolean };
+const { includeBlank = false } = Astro.props;
+---
+
+<label class="ha-field">
+	<span>How often</span>
+	<select name="recurrence">
+		{includeBlank && <option value="">Choose how often</option>}
+		{RECURRENCE_OPTIONS.map((option) => (
+			<option value={option.value}>{option.label}</option>
+		))}
+	</select>
+</label>

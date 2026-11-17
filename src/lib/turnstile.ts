@@ -9,7 +9,7 @@ export async function verifyTurnstile(options: {
   secret: string;
   ip?: string | null;
 }): Promise<string | null> {
-  if (!options.secret) return null;
+  if (!options.secret) return 'The spam check is not configured on the server.';
   if (!options.token.trim()) return 'Please complete the check before continuing.';
   const body = new URLSearchParams();
   body.set('secret', options.secret);

@@ -7,7 +7,7 @@ import AdminNav from '../../../components/AdminNav.astro';
   <section class="page-hero wrap">
     <p class="kicker">Bookings admin</p>
     <h1>Hire agreements</h1>
-    <p>Open a booking to check the details, then send the hire agreement invite when you are ready.</p>
+    <p>Drafts still need an invite or a completed form. Submitted agreements have been signed.</p>
   </section>
 
   <section class="section section-paper">
@@ -16,28 +16,61 @@ import AdminNav from '../../../components/AdminNav.astro';
       <div class="admin-toolbar">
         <label class="ha-field admin-search">
           <span>Search</span>
-          <input type="search" data-admin-search placeholder="Name, email or booking number" />
+          <input type="search" data-admin-search placeholder="Name, email, event or booking number" />
         </label>
       </div>
       </AdminNav>
       <p class="ha-banner is-error" data-admin-error hidden></p>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Hirer</th>
-              <th>Booking</th>
-              <th>Status</th>
-              <th>Invite</th>
-            </tr>
-          </thead>
-          <tbody data-admin-rows>
-            <tr><td colspan="6">Loading hire agreements…</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <section class="admin-request-block">
+        <h2>Pending <span class="admin-request-count" data-request-count="unconfirmed"></span></h2>
+        <p class="ha-note">Drafts that still need an invite or a completed hire agreement.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-request-list">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Hirer</th>
+                <th>Status</th>
+                <th><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody data-admin-rows="unconfirmed">
+              <tr><td colspan="5">Loading hire agreements…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pager" data-pager="unconfirmed" hidden>
+          <button class="button button-sm button-secondary" type="button" data-page-prev>Previous</button>
+          <span data-page-label></span>
+          <button class="button button-sm button-secondary" type="button" data-page-next>Next</button>
+        </div>
+      </section>
+      <section class="admin-request-block">
+        <h2>Submitted <span class="admin-request-count" data-request-count="confirmed"></span></h2>
+        <p class="ha-note">Hire agreements that have been submitted.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-request-list">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Hirer</th>
+                <th>Status</th>
+                <th><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody data-admin-rows="confirmed">
+              <tr><td colspan="5">Loading hire agreements…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pager" data-pager="confirmed" hidden>
+          <button class="button button-sm button-secondary" type="button" data-page-prev>Previous</button>
+          <span data-page-label></span>
+          <button class="button button-sm button-secondary" type="button" data-page-next>Next</button>
+        </div>
+      </section>
     </div>
   </section>
 </BaseLayout>

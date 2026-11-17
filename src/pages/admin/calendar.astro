@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AdminNav from '../../components/AdminNav.astro';
 import BookingCalendar from '../../components/BookingCalendar.astro';
+import CalendarPrivacyField from '../../components/CalendarPrivacyField.astro';
+import RecurrenceSelect from '../../components/RecurrenceSelect.astro';
 ---
 
 <BaseLayout title="Booking calendar" description="Admin calendar for Leighs Village Hall." noindex>
@@ -50,7 +52,7 @@ import BookingCalendar from '../../components/BookingCalendar.astro';
           <button class="button button-primary" type="submit">Copy into that year</button>
         </div>
       </form>
-      <form class="ha-form card mt-4" data-admin-hold>
+      <form class="ha-form card mt-4" id="new-booking" data-admin-hold>
         <h2>Hold a date or series</h2>
         <p class="ha-note">Use this for clubs and other bookings you are placing yourselves, including next year.</p>
         <div class="ha-grid">
@@ -64,18 +66,21 @@ import BookingCalendar from '../../components/BookingCalendar.astro';
           <label class="ha-field"><span>To</span><input name="timeTo" type="time" required /></label>
         </div>
         <div class="ha-choice" data-room-choices></div>
+        <label class="ha-field">
+          <span>Event title</span>
+          <input name="functionType" type="text" />
+        </label>
+        <CalendarPrivacyField />
+        <label class="ha-field">
+          <span>Event description</span>
+          <textarea name="eventDescription" rows="2"></textarea>
+        </label>
         <label class="ha-check">
           <input name="isRecurring" type="checkbox" value="true" data-admin-recurring />
           <span>Recurring booking</span>
         </label>
         <div class="ha-grid" data-recurrence-fields hidden>
-          <label class="ha-field">
-            <span>How often</span>
-            <select name="recurrence">
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
+          <RecurrenceSelect />
           <label class="ha-field"><span>Until</span><input name="recurrenceUntil" type="date" /></label>
         </div>
         <label class="ha-field"><span>Notes</span><textarea name="notes" rows="2"></textarea></label>

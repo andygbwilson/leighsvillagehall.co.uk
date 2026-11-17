@@ -9,7 +9,7 @@
 		"binding": "ASSETS",
 		"run_worker_first": ["/api/*", "/admin", "/admin/*"],
 	},
-	"kv_namespaces": [{ "binding": "HIRE_AGREEMENTS", "id": "ebff07abfd994ea380c87285d8a9479e" }],
+	"kv_namespaces": [{ "binding": "BOOKINGS", "id": "ebff07abfd994ea380c87285d8a9479e" }],
 	"send_email": [
 		{
 			"name": "EMAIL",
@@ -30,7 +30,7 @@
 		"staging": {
 			"name": "leighs-village-hall-staging",
 			"workers_dev": true,
-			"kv_namespaces": [{ "binding": "HIRE_AGREEMENTS", "id": "44f78c15e7074da4857fb9a96637b14f" }],
+			"kv_namespaces": [{ "binding": "BOOKINGS", "id": "44f78c15e7074da4857fb9a96637b14f" }],
 			"send_email": [
 				{
 					"name": "EMAIL",

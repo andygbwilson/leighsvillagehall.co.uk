@@ -7,7 +7,7 @@ import AdminNav from '../../components/AdminNav.astro';
   <section class="page-hero wrap">
     <p class="kicker">Bookings admin</p>
     <h1>Booking requests</h1>
-    <p>Review new requests, then send a hire agreement when the date can be confirmed.</p>
+    <p>Unconfirmed bookings need a hire agreement. Confirmed bookings are already agreed.</p>
   </section>
   <section class="section section-paper">
     <div class="wrap" data-admin-bookings>
@@ -15,28 +15,61 @@ import AdminNav from '../../components/AdminNav.astro';
       <div class="admin-toolbar">
         <label class="ha-field admin-search">
           <span>Search</span>
-          <input type="search" data-admin-search placeholder="Name, email or booking number" />
+          <input type="search" data-admin-search placeholder="Name, email, event or booking number" />
         </label>
       </div>
       </AdminNav>
       <p class="ha-banner is-error" data-admin-error hidden></p>
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Hirer</th>
-              <th>Halls</th>
-              <th>Recurring</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody data-admin-rows>
-            <tr><td colspan="6">Loading requests…</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <section class="admin-request-block">
+        <h2>Unconfirmed <span class="admin-request-count" data-request-count="unconfirmed"></span></h2>
+        <p class="ha-note">Requests and held dates that still need confirming.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-request-list">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Status</th>
+                <th><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody data-admin-rows="unconfirmed">
+              <tr><td colspan="5">Loading requests…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pager" data-pager="unconfirmed" hidden>
+          <button class="button button-sm button-secondary" type="button" data-page-prev>Previous</button>
+          <span data-page-label></span>
+          <button class="button button-sm button-secondary" type="button" data-page-next>Next</button>
+        </div>
+      </section>
+      <section class="admin-request-block">
+        <h2>Confirmed <span class="admin-request-count" data-request-count="confirmed"></span></h2>
+        <p class="ha-note">Bookings that have been agreed.</p>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-request-list">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Status</th>
+                <th><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody data-admin-rows="confirmed">
+              <tr><td colspan="5">Loading requests…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pager" data-pager="confirmed" hidden>
+          <button class="button button-sm button-secondary" type="button" data-page-prev>Previous</button>
+          <span data-page-label></span>
+          <button class="button button-sm button-secondary" type="button" data-page-next>Next</button>
+        </div>
+      </section>
     </div>
   </section>
 </BaseLayout>

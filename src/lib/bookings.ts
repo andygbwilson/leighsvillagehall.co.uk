@@ -2,8 +2,21 @@ import type { HireAgreementPayload } from './hire-agreement';
 import type { AdminAccount, AdminRole } from './admin-auth';
 
 export type BookingStatus = 'requested' | 'held' | 'invite_sent' | 'agreed' | 'declined' | 'cancelled';
-export type Recurrence = '' | 'weekly' | 'monthly';
+export const RECURRENCE_OPTIONS = [
+  { value: 'weekly', label: 'Each week' },
+  { value: 'weekdays', label: 'On weekdays' },
+  { value: 'fortnightly', label: 'Every other week' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'monthly', label: 'Monthly' },
+] as const;
+
+export type RecurrenceValue = (typeof RECURRENCE_OPTIONS)[number]['value'];
+export type Recurrence = '' | RecurrenceValue;
+
+const RECURRENCE_VALUES = RECURRENCE_OPTIONS.map((option) => option.value) as RecurrenceValue[];
+const MAX_RECURRENCE_DATES = 750;
 export type BookingSource = 'website' | 'admin' | 'hbo';
+export type CalendarPrivacy = 'show' | 'private';
 export type RoomId = string;
 
 export type HallRoom = {
@@ -32,6 +45,8 @@ export type HallBooking = {
   timeFrom: string;
   timeTo: string;
   functionType: string;
+  eventDescription: string;
+  calendarPrivacy: CalendarPrivacy;
   numberAttending: string;
   rooms: RoomId[];
   johnWrightHall: boolean;
@@ -74,6 +89,9 @@ export type PublicCalendarEvent = {
   rooms: RoomId[];
   colour: string;
   status: 'provisional' | 'booked';
+  organisation?: string;
+  description?: string;
+  privateEvent?: boolean;
 };
 
 export type AdminCalendarEvent = PublicCalendarEvent & {
@@ -83,6 +101,8 @@ export type AdminCalendarEvent = PublicCalendarEvent & {
   telephone: string;
   organisation: string;
   notes: string;
+  eventDescription: string;
+  calendarPrivacy: CalendarPrivacy;
   bookingStatus: BookingStatus;
   isRecurring: boolean;
 };
@@ -101,6 +121,8 @@ export type BookingRequestInput = {
   timeFrom: string;
   timeTo: string;
   functionType?: string;
+  eventDescription?: string;
+  calendarPrivacy?: CalendarPrivacy;
   numberAttending?: string;
   rooms?: RoomId[];
   johnWrightHall?: boolean;
@@ -117,6 +139,21 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function isValidEmail(value: string): boolean {
   return EMAIL.test(value.trim());
+}
+
+export function parseCalendarPrivacy(value: unknown): CalendarPrivacy {
+  const raw = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (raw === 'private' || raw === 'private event' || raw === 'hidden') return 'private';
+  return 'show';
+}
+
+export function isPrivateCalendar(booking: { calendarPrivacy?: CalendarPrivacy }): boolean {
+  return booking.calendarPrivacy === 'private';
+}
+
+export function publicCalendarTitle(booking: Pick<HallBooking, 'functionType' | 'organisation' | 'calendarPrivacy'>): string {
+  if (isPrivateCalendar(booking)) return 'Private Event';
+  return (booking.functionType || '').trim() || (booking.organisation || '').trim() || 'Booking';
 }
 
 export const MULTI_ROOM_COLOUR = '#6b7280';
@@ -155,6 +192,8 @@ export function emptyBooking(partial: Partial<HallBooking> & Pick<HallBooking, '
     county: '',
     postcode: '',
     functionType: '',
+    eventDescription: '',
+    calendarPrivacy: 'show',
     numberAttending: '',
     rooms: [],
     johnWrightHall: false,
@@ -178,7 +217,7 @@ export function parseBookingRequest(input: unknown, source: BookingSource): Book
   const str = (key: string) => (typeof body[key] === 'string' ? body[key].trim() : '');
   const bool = (key: string) => body[key] === true || body[key] === 'true' || body[key] === 'yes' || body[key] === 'on';
   const recurrenceRaw = str('recurrence');
-  const recurrence: Recurrence = recurrenceRaw === 'weekly' || recurrenceRaw === 'monthly' ? recurrenceRaw : '';
+  const recurrence: Recurrence = isRecurrence(recurrenceRaw) ? recurrenceRaw : '';
   const isRecurring = bool('isRecurring') || bool('recurring');
   return {
     hirerName: str('hirerName'),
@@ -194,6 +233,8 @@ export function parseBookingRequest(input: unknown, source: BookingSource): Book
     timeFrom: str('timeFrom'),
     timeTo: str('timeTo'),
     functionType: str('functionType'),
+    eventDescription: str('eventDescription'),
+    calendarPrivacy: parseCalendarPrivacy(body.calendarPrivacy),
     numberAttending: str('numberAttending'),
     rooms: roomsFromInput(body),
     johnWrightHall: bool('johnWrightHall') || roomsFromInput(body).includes('john'),
@@ -220,6 +261,9 @@ export function validateBookingRequest(
     need(input.email, 'Enter an email address.');
     if (input.email && !EMAIL.test(input.email)) errors.push('Enter a valid email address.');
     need(input.telephone, 'Enter a telephone number.');
+    need(input.addressLine1, 'Enter your address.');
+    need(input.postcode, 'Enter a postcode.');
+    need(input.eventDescription, 'Enter an event description.');
   }
   need(input.hireDate, 'Choose a date.');
   if (input.hireDate && !DATE.test(input.hireDate)) errors.push('Enter a valid date.');
@@ -231,8 +275,14 @@ export function validateBookingRequest(
     errors.push('The finish time must be after the start time.');
   }
   if (!rooms.length) errors.push('Choose at least one hall or space.');
-  if (input.isRecurring && input.recurrence !== 'weekly' && input.recurrence !== 'monthly') {
-    errors.push('Choose weekly or monthly for a recurring booking.');
+  if (!options.asAdmin && input.calendarPrivacy !== 'show' && input.calendarPrivacy !== 'private') {
+    errors.push('Choose whether the event should appear on the public calendar.');
+  }
+  if (!options.asAdmin) {
+    need(input.functionType, 'Enter an event title.');
+  }
+  if (input.isRecurring && !isRecurrence(input.recurrence)) {
+    errors.push('Choose how often the booking should repeat.');
   }
   const limit = options.asAdmin ? settings.adminBookUntil : settings.publicBookUntil;
   if (input.hireDate && limit && input.hireDate > limit) {
@@ -296,16 +346,43 @@ export function findConflict(
   return existing.find((event) => event.id !== candidate.id && bookingsOverlap(candidate, event, gapMinutes));
 }
 
+export function isRecurrence(value: string): value is RecurrenceValue {
+  return RECURRENCE_VALUES.includes(value as RecurrenceValue);
+}
+
+export function recurrenceLabel(value: string): string {
+  return RECURRENCE_OPTIONS.find((option) => option.value === value)?.label ?? value;
+}
+
 export function recurrenceDates(start: string, recurrence: Recurrence, until: string): string[] {
-  if (!DATE.test(start) || (recurrence !== 'weekly' && recurrence !== 'monthly') || !DATE.test(until)) return [];
+  if (!DATE.test(start) || !isRecurrence(recurrence) || !DATE.test(until)) return [];
   const dates: string[] = [];
   let current = start;
-  while (true) {
-    current = recurrence === 'weekly' ? addDays(current, 7) : addMonths(current, 1);
+  while (dates.length < MAX_RECURRENCE_DATES) {
+    current = nextRecurrenceDate(current, recurrence);
     if (!current || current > until) break;
     dates.push(current);
   }
   return dates;
+}
+
+function nextRecurrenceDate(current: string, recurrence: RecurrenceValue): string {
+  if (recurrence === 'daily') return addDays(current, 1);
+  if (recurrence === 'weekly') return addDays(current, 7);
+  if (recurrence === 'fortnightly') return addDays(current, 14);
+  if (recurrence === 'monthly') return addMonths(current, 1);
+  return nextWeekday(current);
+}
+
+function nextWeekday(value: string): string {
+  let next = addDays(value, 1);
+  while (next && isWeekend(next)) next = addDays(next, 1);
+  return next;
+}
+
+function isWeekend(value: string): boolean {
+  const day = new Date(`${value}T12:00:00`).getDay();
+  return day === 0 || day === 6;
 }
 
 export function calendarEvents(
@@ -326,14 +403,20 @@ export function calendarEvents(
   const visible = events.filter((event) => isActiveStatus(event.status));
   const mapped = visible.map((event) => {
     const rooms = roomsOf(event);
+    const privateEvent = isPrivateCalendar(event);
     const base: PublicCalendarEvent = {
       date: event.hireDate,
       timeFrom: event.timeFrom,
       timeTo: event.timeTo,
-      title: event.functionType || event.hirerName || 'Booking',
+      title: options.admin
+        ? event.functionType || event.hirerName || 'Booking'
+        : publicCalendarTitle(event),
       rooms,
       colour: colourForRooms(rooms, roomList),
       status: event.status === 'requested' || event.status === 'held' ? 'provisional' : 'booked',
+      organisation: options.admin || !privateEvent ? event.organisation : '',
+      description: options.admin || !privateEvent ? event.eventDescription || '' : '',
+      privateEvent,
     };
     if (options.admin) {
       return {
@@ -344,6 +427,8 @@ export function calendarEvents(
         telephone: event.telephone,
         organisation: event.organisation,
         notes: event.notes,
+        eventDescription: event.eventDescription || '',
+        calendarPrivacy: event.calendarPrivacy === 'private' ? 'private' : 'show',
         bookingStatus: event.status,
         isRecurring: event.isRecurring || event.isOccurrence,
       };
@@ -544,7 +629,7 @@ export function bookingTemplateVars(
 ): Record<string, string> {
   const when = [formatDay(booking.hireDate), formatTimeRange(booking.timeFrom, booking.timeTo)].filter(Boolean).join(', ');
   const recurring = booking.isRecurring
-    ? `${booking.recurrence || 'yes'}${booking.recurrenceUntil ? ` until ${formatDay(booking.recurrenceUntil)}` : ''}`.trim()
+    ? `${recurrenceLabel(booking.recurrence) || 'yes'}${booking.recurrenceUntil ? ` until ${formatDay(booking.recurrenceUntil)}` : ''}`.trim()
     : 'No';
   return {
     bookingNumber: String(booking.id),

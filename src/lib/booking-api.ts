@@ -137,8 +137,10 @@ export async function handleBookingApi(request: Request, url: URL, ctx: BookingA
     return adminCalendar(url, ctx);
   }
   if (url.pathname === '/api/admin/bookings' && request.method === 'GET') {
-    const events = await ctx.store.listEvents();
-    return json({ bookings: events.filter((event) => !event.isOccurrence), session });
+    const state = await ctx.store.getState();
+    const bookings = state.events.filter((event) => !event.isOccurrence);
+    const rooms = [...state.rooms].sort((a, b) => a.sort - b.sort);
+    return json({ bookings, rooms, session });
   }
   if (url.pathname === '/api/admin/bookings' && request.method === 'POST') {
     requireBookings(session);

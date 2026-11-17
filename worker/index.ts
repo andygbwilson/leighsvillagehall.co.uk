@@ -31,7 +31,7 @@ import {
 
 export interface Env {
   ASSETS: Fetcher;
-  HIRE_AGREEMENTS: KVNamespace;
+  BOOKINGS: KVNamespace;
   EMAIL: {
     send(message: {
       to: string | { email: string; name?: string };
@@ -137,9 +137,9 @@ export default {
 };
 
 async function handleHireAgreement(request: Request, env: Env, url: URL): Promise<Response> {
-  if (!env.HIRE_AGREEMENTS) {
+  if (!env.BOOKINGS) {
     return Response.json(
-      { error: 'Hire agreement storage is not configured.' },
+      { error: 'Booking storage is not configured.' },
       { status: 503, headers: jsonHeaders },
     );
   }
@@ -152,7 +152,7 @@ async function handleHireAgreement(request: Request, env: Env, url: URL): Promis
         { status: 400, headers: jsonHeaders },
       );
     }
-    const record = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(
+    const record = await env.BOOKINGS.get<HireAgreementRecord>(
       bookingStorageKey(bookingNumber),
       'json',
     );
@@ -164,7 +164,7 @@ async function handleHireAgreement(request: Request, env: Env, url: URL): Promis
 
   if (request.method === 'POST') {
     const payload = omitPublicLockedFields(parsePayload(await request.json()));
-    const existing = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(
+    const existing = await env.BOOKINGS.get<HireAgreementRecord>(
       bookingStorageKey(payload.bookingNumber),
       'json',
     );
@@ -191,9 +191,9 @@ async function handleAdminApi(request: Request, env: Env, url: URL): Promise<Res
     return Response.json({ error: 'Please sign in.' }, { status: 401, headers: jsonHeaders });
   }
 
-  if (!env.HIRE_AGREEMENTS) {
+  if (!env.BOOKINGS) {
     return Response.json(
-      { error: 'Hire agreement storage is not configured.' },
+      { error: 'Booking storage is not configured.' },
       { status: 503, headers: jsonHeaders },
     );
   }
@@ -211,7 +211,7 @@ async function handleAdminApi(request: Request, env: Env, url: URL): Promise<Res
     if (request.method !== 'POST') {
       return Response.json({ error: 'Method not allowed.' }, { status: 405, headers: jsonHeaders });
     }
-    const existing = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(
+    const existing = await env.BOOKINGS.get<HireAgreementRecord>(
       bookingStorageKey(bookingNumber),
       'json',
     );
@@ -231,7 +231,7 @@ async function handleAdminApi(request: Request, env: Env, url: URL): Promise<Res
     const key = bookingStorageKey(bookingNumber);
 
     if (request.method === 'GET') {
-      const record = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(key, 'json');
+      const record = await env.BOOKINGS.get<HireAgreementRecord>(key, 'json');
       if (!record) {
         return Response.json({ error: 'No hire agreement was found for that booking.' }, { status: 404, headers: jsonHeaders });
       }
@@ -239,7 +239,7 @@ async function handleAdminApi(request: Request, env: Env, url: URL): Promise<Res
     }
 
     if (request.method === 'PUT') {
-      const existing = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(key, 'json');
+      const existing = await env.BOOKINGS.get<HireAgreementRecord>(key, 'json');
       if (!existing) {
         return Response.json({ error: 'No hire agreement was found for that booking.' }, { status: 404, headers: jsonHeaders });
       }
@@ -283,7 +283,7 @@ async function handleBookingEmail(message: IncomingEmail, env: Env): Promise<voi
     return;
   }
 
-  const existing = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(
+  const existing = await env.BOOKINGS.get<HireAgreementRecord>(
     bookingStorageKey(booking.bookingNumber),
     'json',
   );
@@ -385,7 +385,7 @@ async function sendStoredHireInvite(env: Env, existing: HireAgreementRecord): Pr
 }
 
 async function putAgreement(env: Env, record: HireAgreementRecord): Promise<void> {
-  await env.HIRE_AGREEMENTS.put(bookingStorageKey(record.bookingNumber), JSON.stringify(record), {
+  await env.BOOKINGS.put(bookingStorageKey(record.bookingNumber), JSON.stringify(record), {
     metadata: agreementKvMetadata(record),
   });
 }
@@ -394,7 +394,7 @@ async function listAgreements(env: Env): Promise<HireAgreementSummary[]> {
   const summaries: HireAgreementSummary[] = [];
   let cursor: string | undefined;
   do {
-    const page = await env.HIRE_AGREEMENTS.list({ prefix: 'booking:', cursor });
+    const page = await env.BOOKINGS.list({ prefix: 'booking:', cursor });
     for (const key of page.keys) {
       const meta = key.metadata as Record<string, string> | null;
       if (meta?.bookingNumber) {
@@ -405,13 +405,16 @@ async function listAgreements(env: Env): Promise<HireAgreementSummary[]> {
           hireDate: meta.hireDate ?? '',
           timeFrom: meta.timeFrom ?? '',
           timeTo: meta.timeTo ?? '',
+          functionType: meta.functionType ?? '',
+          johnWrightHall: meta.johnWrightHall ?? '',
+          brianPoultneyHall: meta.brianPoultneyHall ?? '',
           status: meta.status === 'submitted' ? 'submitted' : 'draft',
           updatedAt: meta.updatedAt ?? '',
           inviteSentAt: meta.inviteSentAt ?? '',
         });
         continue;
       }
-      const record = await env.HIRE_AGREEMENTS.get<HireAgreementRecord>(key.name, 'json');
+      const record = await env.BOOKINGS.get<HireAgreementRecord>(key.name, 'json');
       if (record) summaries.push(agreementSummary(record));
     }
     cursor = page.list_complete ? undefined : page.cursor;
@@ -426,10 +429,10 @@ async function isSignedIn(request: Request, env: Env): Promise<boolean> {
 function bookingStore(env: Env) {
   return createBookingStore({
     async load() {
-      return env.HIRE_AGREEMENTS.get(BOOKING_SYSTEM_KEY, 'json');
+      return env.BOOKINGS.get(BOOKING_SYSTEM_KEY, 'json');
     },
     async save(state) {
-      await env.HIRE_AGREEMENTS.put(BOOKING_SYSTEM_KEY, JSON.stringify(state));
+      await env.BOOKINGS.put(BOOKING_SYSTEM_KEY, JSON.stringify(state));
     },
   });
 }
@@ -448,7 +451,7 @@ function bookingContext(request: Request, env: Env, url: URL): BookingApiContext
     inviteAllowlist: parseInviteAllowlist(env.HIRE_INVITE_ALLOWLIST),
     secure: url.protocol === 'https:',
     turnstileSecret: env.TURNSTILE_SECRET_KEY ?? '',
-    getAgreement: (bookingNumber) => env.HIRE_AGREEMENTS.get<HireAgreementRecord>(bookingStorageKey(bookingNumber), 'json'),
+    getAgreement: (bookingNumber) => env.BOOKINGS.get<HireAgreementRecord>(bookingStorageKey(bookingNumber), 'json'),
     putAgreement: (record) => putAgreement(env, record),
     assertCanSendInvite: (record) => assertCanSendInvite(record, parseInviteAllowlist(env.HIRE_INVITE_ALLOWLIST)),
     sendHireInvite: async (record) => ({ record: await sendStoredHireInvite(env, record), delivered: true }),

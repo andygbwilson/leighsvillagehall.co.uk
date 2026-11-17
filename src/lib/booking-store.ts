@@ -136,7 +136,6 @@ export function createBookingStore(io: {
         let created = 0;
         let updated = 0;
         const skipped: Array<{ title: string; reason: string }> = [];
-        const gap = state.settings.gapMinutes || 0;
         for (const row of rows) {
           const title = row.functionType || row.hirerName || 'Booking';
           if (!row.rooms.length) {
@@ -145,17 +144,31 @@ export function createBookingStore(io: {
           }
           const existing = row.id ? state.events.find((event) => event.id === row.id) : undefined;
           if (existing) {
-            if (!existing.email && row.email) existing.email = row.email;
-            if (!existing.telephone && row.telephone) existing.telephone = row.telephone;
-            if (!existing.hirerName && row.hirerName) existing.hirerName = row.hirerName;
-            if (!existing.functionType && row.functionType) existing.functionType = row.functionType;
+            const next = rowToBooking(row, existing.id);
+            existing.status = next.status;
+            existing.hirerName = next.hirerName;
+            existing.organisation = next.organisation;
+            existing.email = next.email;
+            existing.telephone = next.telephone;
+            existing.addressLine1 = next.addressLine1;
+            existing.hireDate = next.hireDate;
+            existing.timeFrom = next.timeFrom;
+            existing.timeTo = next.timeTo;
+            existing.functionType = next.functionType;
+            existing.eventDescription = next.eventDescription;
+            existing.calendarPrivacy = next.calendarPrivacy;
+            existing.numberAttending = next.numberAttending;
+            existing.notes = next.notes;
+            existing.rooms = next.rooms;
+            existing.johnWrightHall = next.johnWrightHall;
+            existing.brianPoultneyHall = next.brianPoultneyHall;
             existing.updatedAt = new Date().toISOString();
             updated += 1;
             continue;
           }
           const id = row.id && !state.events.some((event) => event.id === row.id) ? row.id : state.nextId;
           const booking = rowToBooking(row, id);
-          const conflict = findConflict(booking, state.events, gap);
+          const conflict = findConflict(booking, state.events, 0);
           if (conflict) {
             skipped.push({ title, reason: `Overlaps booking ${conflict.id} (${conflict.hirerName || conflict.functionType}).` });
             continue;
@@ -329,6 +342,8 @@ export function createBookingStore(io: {
           timeFrom: input.timeFrom,
           timeTo: input.timeTo,
           functionType: input.functionType?.trim() ?? '',
+          eventDescription: input.eventDescription?.trim() ?? '',
+          calendarPrivacy: input.calendarPrivacy === 'private' ? 'private' : 'show',
           numberAttending: input.numberAttending?.trim() ?? '',
           rooms: roomsOf({ ...input, rooms: input.rooms ?? [] }),
           johnWrightHall: roomsOf({ ...input, rooms: input.rooms ?? [] }).includes('john'),

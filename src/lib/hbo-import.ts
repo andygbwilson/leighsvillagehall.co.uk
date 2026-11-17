@@ -1,4 +1,12 @@
-import { emptyBooking, parseFacilities, type BookingStatus, type HallBooking, type HallRoom } from './bookings';
+import {
+  emptyBooking,
+  parseCalendarPrivacy,
+  parseFacilities,
+  type BookingStatus,
+  type CalendarPrivacy,
+  type HallBooking,
+  type HallRoom,
+} from './bookings';
 
 export type ImportRow = {
   id?: number;
@@ -10,7 +18,11 @@ export type ImportRow = {
   timeFrom: string;
   timeTo: string;
   functionType: string;
+  eventDescription: string;
+  calendarPrivacy: CalendarPrivacy;
   notes: string;
+  addressLine1?: string;
+  numberAttending?: string;
   rooms: string[];
   status: BookingStatus;
 };
@@ -56,20 +68,27 @@ export function parseHboCsv(text: string, rooms: HallRoom[]): ImportRow[] {
     );
     const functionType = get(['eventtitle', 'event', 'title', 'eventname']) || get(['name']);
     const hirerName = get(['hirer', 'customer', 'contact', 'bookedby', 'hirername']) || get(['name']) || functionType;
+    const calendarPrivacy = privacyFrom(get(['privacy', 'publiccalendar', 'calendarprivacy', 'privateevent']), functionType);
     const status = statusFrom(get(['status', 'state', 'approved']));
     const idRaw = get(['id', 'bookingid', 'eventid', 'bookingnumber']);
     const id = Number(idRaw);
+    const publicNotes = get(['eventdescription', 'publicdescription']) || get(['notes']);
+    const adminNotes = [get(['adminnotes']), get(['additional']), get(['message'])].filter(Boolean).join('\n\n');
     rows.push({
       id: Number.isFinite(id) && id > 0 ? id : undefined,
       hirerName: hirerName || 'Imported booking',
       email: get(['email', 'e-mail', 'mail']),
       telephone: get(['telephone', 'phone', 'mobile', 'tel']),
       organisation: get(['organisation', 'organization', 'club', 'group']),
+      addressLine1: get(['address']),
       hireDate,
       timeFrom,
       timeTo,
       functionType,
-      notes: get(['notes', 'note', 'description', 'adminnotes', 'message']),
+      eventDescription: publicNotes,
+      calendarPrivacy,
+      numberAttending: get(['noattending', 'numberattending', 'attending']),
+      notes: adminNotes,
       rooms: unique([...(mapped.length ? mapped : extraRooms)]),
       status,
     });
@@ -101,7 +120,9 @@ export function parseHboFeed(events: FeedEvent[], rooms: HallRoom[]): ImportRow[
       timeFrom,
       timeTo,
       functionType: event.title ?? '',
-      notes: props.notes ?? '',
+      eventDescription: props.notes ?? '',
+      calendarPrivacy: privacyFrom('', event.title ?? ''),
+      notes: '',
       rooms: unique(fromFacility.length ? fromFacility : fromCodes),
       status: statusFrom(props.status ?? ''),
     });
@@ -148,6 +169,10 @@ export function rowToBooking(row: ImportRow, id: number): HallBooking {
     timeFrom: row.timeFrom,
     timeTo: row.timeTo,
     functionType: row.functionType,
+    eventDescription: row.eventDescription,
+    calendarPrivacy: row.calendarPrivacy,
+    numberAttending: row.numberAttending ?? '',
+    addressLine1: row.addressLine1 ?? '',
     notes: row.notes,
     rooms: row.rooms,
     johnWrightHall: row.rooms.includes('john'),
@@ -222,6 +247,11 @@ function toIsoTime(value: string): string {
   const compact = trimmed.match(/^(\d{2})(\d{2})$/);
   if (compact) return `${compact[1]}:${compact[2]}`;
   return '';
+}
+
+function privacyFrom(value: string, title: string): CalendarPrivacy {
+  if (parseCalendarPrivacy(value) === 'private') return 'private';
+  return /^private event$/i.test(title.trim()) ? 'private' : 'show';
 }
 
 function statusFrom(value: string): BookingStatus {

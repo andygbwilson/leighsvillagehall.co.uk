@@ -80,7 +80,7 @@ Until DNS is switched, test on the `*.workers.dev` URL Wrangler prints.
 
 ## Staging
 
-Staging is a separate Worker (`leighs-village-hall-staging`) with its own hire-agreement KV store. It is built with noindex and `SITE_ORIGIN` set to `https://staging.leighsvillagehall.co.uk`.
+Staging is a separate Worker (`leighs-village-hall-staging`) with its own `BOOKINGS` KV store. It is built with noindex and `SITE_ORIGIN` set to `https://staging.leighsvillagehall.co.uk`.
 
 ```sh
 npx wrangler secret put HIRE_ADMIN_PASSWORD --env staging
@@ -95,12 +95,14 @@ The public `/bookings` page is the calendar and enquiry form. Requests notify th
 
 Hirers can review past and upcoming bookings without an account: `/bookings/access` asks for the email used on the booking and emails a 24-hour link to `/bookings/mine`. The same message is returned whether or not that email is on file. Local `npm run dev` logs the access email instead of sending it.
 
-The enquiry form is protected with [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/). Local `npm run dev` uses Cloudflare’s always-pass dummy keys. For production, create a widget in the Cloudflare dashboard, set `PUBLIC_TURNSTILE_SITE_KEY` for the build, and store the secret with:
+The enquiry form is protected with [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/). Local `npm run dev` uses Cloudflare’s always-pass dummy keys. The widget on the page is only the client half: the Worker must call Cloudflare’s `siteverify` API when someone sends an enquiry or requests booking access. For staging and production, create a widget in the Cloudflare dashboard, set `PUBLIC_TURNSTILE_SITE_KEY` for the **build**, and store the matching secret on the Worker:
 
 ```sh
-npx wrangler secret put TURNSTILE_SECRET_KEY
 npx wrangler secret put TURNSTILE_SECRET_KEY --env staging
+npx wrangler secret put TURNSTILE_SECRET_KEY
 ```
+
+A dashboard warning that siteverify is not being called usually means the secret is missing on that Worker, or no form has been submitted yet. Loading `/bookings` is not enough; send a test enquiry after the secret is set. Do not use Cloudflare’s “Fix with Spin” option — this site verifies tokens in the Worker.
 
 Recurring requests (weekly or monthly) stay as a single date until the secretary confirms they are possible. Club series for next year can be placed on the admin calendar before the public period is opened in **Booking period**.
 

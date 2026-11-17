@@ -1,6 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BookingCalendar from "../components/BookingCalendar.astro";
+import CalendarPrivacyField from "../components/CalendarPrivacyField.astro";
+import RecurrenceSelect from "../components/RecurrenceSelect.astro";
 import { getDocuments, getSite } from "../lib/cms";
 
 const site = await getSite();
@@ -37,6 +39,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 				<p class="kicker">Provisional booking</p>
 				<h2>Make a Booking Enquiry</h2>
 				<p>Send a request for the date and halls you need. The booking secretary will review it before sending a hire agreement.</p>
+				<p class="ha-note">Fields marked <span class="ha-req">*</span> must be filled in.</p>
 			</header>
 			<form class="ha-form" data-booking-form data-turnstile-sitekey={turnstileSiteKey || undefined}>
 				<div class="ha-banner is-error" data-booking-banner hidden></div>
@@ -56,6 +59,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 							<input name="timeTo" type="time" required />
 						</label>
 					</div>
+					<p class="ha-label">Halls or spaces <span class="ha-req" aria-hidden="true">*</span></p>
 					<div class="ha-choice" data-room-choices>
 						<label>
 							<input type="checkbox" name="rooms" value="john" />
@@ -66,19 +70,13 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 							Brian Poultney Hall (small)
 						</label>
 					</div>
+					<h3>Recurring booking</h3>
 					<label class="ha-check">
 						<input name="isRecurring" type="checkbox" value="true" />
 						<span>Is this a recurring booking?</span>
 					</label>
 					<div class="ha-grid" data-recurrence-fields hidden>
-						<label class="ha-field">
-							<span>How often</span>
-							<select name="recurrence">
-								<option value="">Choose weekly or monthly</option>
-								<option value="weekly">Weekly</option>
-								<option value="monthly">Monthly</option>
-							</select>
-						</label>
+						<RecurrenceSelect includeBlank />
 						<label class="ha-field">
 							<span>Until (optional)</span>
 							<input name="recurrenceUntil" type="date" />
@@ -108,8 +106,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 						</label>
 					</div>
 					<label class="ha-field">
-						<span>Address line 1</span>
-						<input name="addressLine1" type="text" autocomplete="address-line1" />
+						<span>Address</span>
+						<input name="addressLine1" type="text" autocomplete="address-line1" required />
 					</label>
 					<div class="ha-grid">
 						<label class="ha-field">
@@ -118,20 +116,25 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 						</label>
 						<label class="ha-field ha-postcode">
 							<span>Postcode</span>
-							<input name="postcode" type="text" autocomplete="postal-code" maxlength="10" />
+							<input name="postcode" type="text" autocomplete="postal-code" maxlength="10" required />
 						</label>
 					</div>
 					<label class="ha-field">
-						<span>Type of function</span>
-						<input name="functionType" type="text" placeholder="For example a children’s party" />
+						<span>Event title</span>
+						<input name="functionType" type="text" placeholder="For example a children’s party" data-event-title required />
 					</label>
 					<label class="ha-field ha-attending">
 						<span>Total number attending</span>
 						<input name="numberAttending" type="number" min="0" inputmode="numeric" />
 					</label>
+					<CalendarPrivacyField />
 					<label class="ha-field">
-						<span>Anything else we should know</span>
-						<textarea name="notes" rows="3"></textarea>
+						<span>Event description</span>
+						<textarea name="eventDescription" rows="3" placeholder="Brief description" required></textarea>
+					</label>
+					<label class="ha-field">
+						<span>Message for the booking secretary</span>
+						<textarea name="notes" rows="3" placeholder="Optional"></textarea>
 					</label>
 				</fieldset>
 				{turnstileSiteKey ? (

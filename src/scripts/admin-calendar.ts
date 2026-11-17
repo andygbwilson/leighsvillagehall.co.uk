@@ -1,3 +1,4 @@
+import { initPrivacyHelp } from './calendar-privacy';
 import { adminFetch, bindAdminLogout } from './admin-session';
 
 function initAdminCalendar() {
@@ -22,6 +23,7 @@ function initAdminCalendar() {
   };
   recurring?.addEventListener('change', sync);
   sync();
+  if (hold) initPrivacyHelp(hold);
 
   if (copyYear) {
     (copyYear.elements.namedItem('fromYear') as HTMLInputElement).value = String(year);
@@ -43,6 +45,9 @@ function initAdminCalendar() {
         timeFrom: String(data.get('timeFrom') ?? ''),
         timeTo: String(data.get('timeTo') ?? ''),
         rooms: data.getAll('rooms').map(String),
+        functionType: String(data.get('functionType') ?? ''),
+        eventDescription: String(data.get('eventDescription') ?? ''),
+        calendarPrivacy: String(data.get('calendarPrivacy') ?? 'show'),
         notes: String(data.get('notes') ?? ''),
         isRecurring: data.get('isRecurring') === 'true',
         recurrence: String(data.get('recurrence') ?? ''),

@@ -11,9 +11,9 @@ const { admin = false } = Astro.props;
   </p>
   <div class="cal-toolbar">
     <div class="cal-nav">
-      <button class="button button-secondary" type="button" data-cal-prev aria-label="Previous">‹</button>
-      <button class="button button-secondary" type="button" data-cal-today>Today</button>
-      <button class="button button-secondary" type="button" data-cal-next aria-label="Next">›</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-prev aria-label="Previous">‹</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-today>Today</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-next aria-label="Next">›</button>
       <label class="cal-select">
         <span class="visually-hidden">Month</span>
         <select data-cal-month></select>
@@ -25,10 +25,10 @@ const { admin = false } = Astro.props;
     </div>
     <h2 data-cal-title>Availability</h2>
     <div class="cal-views" role="tablist" aria-label="Calendar view">
-      <button class="button button-secondary" type="button" data-cal-view-btn="month">Month</button>
-      <button class="button button-secondary" type="button" data-cal-view-btn="week">Week</button>
-      <button class="button button-secondary" type="button" data-cal-view-btn="day">Day</button>
-      <button class="button button-secondary" type="button" data-cal-view-btn="list">List</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-view-btn="month">Month</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-view-btn="week">Week</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-view-btn="day">Day</button>
+      <button class="button button-sm button-secondary" type="button" data-cal-view-btn="list">List</button>
     </div>
   </div>
   <div class="cal-filter-row">
@@ -40,7 +40,15 @@ const { admin = false } = Astro.props;
     </label>
     <ul class="cal-legend" data-cal-legend></ul>
   </div>
-  <p class="ha-note" data-cal-note></p>
+  <div class="cal-note-row">
+    <p class="ha-note" data-cal-note></p>
+    <a class="button button-sm button-primary cal-new" href={admin ? '#new-booking' : '#enquiry'}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+      </svg>
+      New Booking
+    </a>
+  </div>
   <div data-cal-stage></div>
   <dialog class="cal-overview" data-cal-overview>
     <form method="dialog">
@@ -50,8 +58,8 @@ const { admin = false } = Astro.props;
       </header>
       <div class="cal-overview-body" data-cal-overview-body></div>
       <div class="cal-overview-actions">
-        <a class="button button-primary" data-cal-overview-open hidden href="/admin/bookings">Open booking</a>
-        <button class="button button-secondary" type="submit">Close</button>
+        <a class="button button-sm button-primary" data-cal-overview-open hidden href="/admin/bookings">Open booking</a>
+        <button class="button button-sm button-secondary" type="submit">Close</button>
       </div>
     </form>
   </dialog>

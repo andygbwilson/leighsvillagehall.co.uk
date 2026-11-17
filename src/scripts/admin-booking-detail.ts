@@ -1,4 +1,4 @@
-import { bookingStatusLabel, hallsLabel, type HallBooking } from '../lib/bookings';
+import { bookingStatusLabel, hallsLabel, recurrenceLabel, type HallBooking } from '../lib/bookings';
 import { formatDisplayDate } from '../lib/hire-admin';
 import { adminFetch, bindAdminLogout } from './admin-session';
 
@@ -36,7 +36,7 @@ function initAdminBookingDetail() {
     view.innerHTML = `
       <p class="admin-meta">
         <span class="admin-status">${escapeHtml(bookingStatusLabel(booking.status))}</span>
-        ${booking.isRecurring ? `Recurring ${escapeHtml(booking.recurrence)}${booking.recurringConfirmed ? ' (confirmed)' : ' (needs confirmation)'}.` : ''}
+        ${booking.isRecurring ? `Recurring ${escapeHtml(recurrenceLabel(booking.recurrence) || booking.recurrence)}${booking.recurringConfirmed ? ' (confirmed)' : ' (needs confirmation)'}.` : ''}
       </p>
       <section class="card admin-section">
         <dl class="admin-dl">
@@ -44,6 +44,8 @@ function initAdminBookingDetail() {
           <div><dt>Halls</dt><dd>${escapeHtml(hallsLabel(booking))}</dd></div>
           <div><dt>Hirer</dt><dd>${escapeHtml(booking.hirerName)}<br>${escapeHtml(booking.email)}<br>${escapeHtml(booking.telephone)}</dd></div>
           <div><dt>Event</dt><dd>${escapeHtml(booking.functionType || '—')}</dd></div>
+          <div><dt>Public calendar</dt><dd>${booking.calendarPrivacy === 'private' ? 'Private event' : 'Show event information'}</dd></div>
+          <div><dt>Description</dt><dd>${escapeHtml(booking.eventDescription || '—')}</dd></div>
           <div><dt>Until</dt><dd>${escapeHtml(booking.recurrenceUntil ? formatDisplayDate(booking.recurrenceUntil) : '—')}</dd></div>
           <div><dt>Notes</dt><dd>${escapeHtml(booking.notes || '—')}</dd></div>
         </dl>

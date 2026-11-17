@@ -1,3 +1,4 @@
+import { initPrivacyHelp } from './calendar-privacy';
 import { resetTurnstile, setupTurnstile, turnstileResponse } from './turnstile-widget';
 
 function initBookingForm() {
@@ -27,6 +28,7 @@ function initBookingForm() {
 
   recurring?.addEventListener('change', syncRecurring);
   syncRecurring();
+  initPrivacyHelp(form);
   if (siteKey) void setupTurnstile(form, siteKey).then((id) => {
     widgetId = id;
   }).catch((error: Error) => showBanner(error.message));
@@ -47,6 +49,8 @@ function initBookingForm() {
       timeFrom: String(data.get('timeFrom') ?? ''),
       timeTo: String(data.get('timeTo') ?? ''),
       functionType: String(data.get('functionType') ?? ''),
+      eventDescription: String(data.get('eventDescription') ?? ''),
+      calendarPrivacy: String(data.get('calendarPrivacy') ?? 'show'),
       numberAttending: String(data.get('numberAttending') ?? ''),
       rooms: data.getAll('rooms').map(String),
       johnWrightHall: data.getAll('rooms').includes('john'),
